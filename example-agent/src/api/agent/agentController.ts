@@ -14,7 +14,7 @@ class AgentController {
     const { auction, solution } = req.body;
     const success = await userService.execute(auction, solution);
 
-    return res.json(success);
+    return res.json({ success });
   };
 }
 
