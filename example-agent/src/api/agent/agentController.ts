@@ -1,19 +1,21 @@
 import type { Request, RequestHandler, Response } from "express";
 
-import { userService } from "@/api/user/userService";
-import { handleServiceResponse } from "@/common/utils/httpHandlers";
+import { userService } from "@/api/agent/agentService";
 
-class UserController {
-  public getUsers: RequestHandler = async (_req: Request, res: Response) => {
-    const serviceResponse = await userService.findAll();
-    return handleServiceResponse(serviceResponse, res);
+class AgentController {
+  public bid: RequestHandler = async (req: Request, res: Response) => {
+    const { chainId, order, partner } = req.body;
+    const bid = await userService.bid(chainId, order, partner);
+
+    return res.json(bid);
   };
 
-  public getUser: RequestHandler = async (req: Request, res: Response) => {
-    const id = Number.parseInt(req.params.id as string, 10);
-    const serviceResponse = await userService.findById(id);
-    return handleServiceResponse(serviceResponse, res);
+  public execute: RequestHandler = async (req: Request, res: Response) => {
+    const { auction, solution } = req.body;
+    const success = await userService.execute(auction, solution);
+
+    return res.json(success);
   };
 }
 
-export const userController = new UserController();
+export const userController = new AgentController();
