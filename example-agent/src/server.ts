@@ -3,7 +3,7 @@ import express, { type Express } from "express";
 import helmet from "helmet";
 import { pino } from "pino";
 
-import { userRouter } from "@/api/user/userRouter";
+import { agentRouter } from "@/api/agent/agentRouter";
 import errorHandler from "@/common/middleware/errorHandler";
 import rateLimiter from "@/common/middleware/rateLimiter";
 import requestLogger from "@/common/middleware/requestLogger";
@@ -26,7 +26,7 @@ app.use(rateLimiter);
 app.use(requestLogger);
 
 // Routes
-app.use("/users", userRouter);
+app.use("/", agentRouter);
 
 // Error handlers
 app.use(errorHandler());
