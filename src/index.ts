@@ -3,9 +3,9 @@ import { SimulationAuction } from "@/lib/simulation-auction/simulationAuction";
 import { app, logger } from "@/server";
 
 const server = app.listen(env.PORT, () => {
-  SimulationAuction.getInstance(env.CHAIN_ID).start();
   const { NODE_ENV, HOST, PORT } = env;
   logger.info(`Server (${NODE_ENV}) running on port http://${HOST}:${PORT}`);
+  SimulationAuction.getInstance(env.CHAIN_ID).start();
 });
 
 const onCloseSignal = () => {
