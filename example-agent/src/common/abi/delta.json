@@ -1,0 +1,1104 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      { "name": "_name", "type": "string", "internalType": "string" },
+      { "name": "_version", "type": "string", "internalType": "string" },
+      { "name": "_portikusV2", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "DOMAIN_SEPARATOR",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bytes32", "internalType": "bytes32" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "PORTIKUS_V2",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "name",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "selectors",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "moduleSelectors",
+        "type": "bytes4[]",
+        "internalType": "bytes4[]"
+      }
+    ],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "swapSettle",
+    "inputs": [
+      {
+        "name": "orderWithSig",
+        "type": "tuple",
+        "internalType": "struct OrderWithSig",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "executorData", "type": "bytes", "internalType": "bytes" },
+      { "name": "executor", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "swapSettleBatch",
+    "inputs": [
+      {
+        "name": "ordersWithSigs",
+        "type": "tuple[]",
+        "internalType": "struct OrderWithSig[]",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      {
+        "name": "executorData",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      },
+      { "name": "executor", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "directSettle",
+    "inputs": [
+      {
+        "name": "orderWithSig",
+        "type": "tuple",
+        "internalType": "struct OrderWithSig",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "directSettleBatch",
+    "inputs": [
+      {
+        "name": "ordersWithSigs",
+        "type": "tuple[]",
+        "internalType": "struct OrderWithSig[]",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "amounts", "type": "uint256[]", "internalType": "uint256[]" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "swapSettleFillable",
+    "inputs": [
+      {
+        "name": "orderWithSig",
+        "type": "tuple",
+        "internalType": "struct OrderWithSig",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "executorData", "type": "bytes", "internalType": "bytes" },
+      { "name": "executor", "type": "address", "internalType": "address" },
+      { "name": "fillPercent", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "swapSettleFillableBatch",
+    "inputs": [
+      {
+        "name": "ordersWithSigs",
+        "type": "tuple[]",
+        "internalType": "struct OrderWithSig[]",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      {
+        "name": "executorData",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      },
+      { "name": "executor", "type": "address", "internalType": "address" },
+      {
+        "name": "fillPercents",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "directFilledAmount",
+    "inputs": [
+      {
+        "name": "order",
+        "type": "tuple",
+        "internalType": "struct Order",
+        "components": [
+          { "name": "owner", "type": "address", "internalType": "address" },
+          {
+            "name": "beneficiary",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "srcToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "destToken",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "srcAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "destAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "expectedDestAmount",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          {
+            "name": "deadline",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          { "name": "nonce", "type": "uint256", "internalType": "uint256" },
+          {
+            "name": "partnerAndFee",
+            "type": "uint256",
+            "internalType": "uint256"
+          },
+          { "name": "permit", "type": "bytes", "internalType": "bytes" }
+        ]
+      }
+    ],
+    "outputs": [
+      {
+        "name": "totalFilledAmount",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "directSettleFillable",
+    "inputs": [
+      {
+        "name": "orderWithSig",
+        "type": "tuple",
+        "internalType": "struct OrderWithSig",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "fillPercent", "type": "uint256", "internalType": "uint256" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "directSettleFillableBatch",
+    "inputs": [
+      {
+        "name": "ordersWithSigs",
+        "type": "tuple[]",
+        "internalType": "struct OrderWithSig[]",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              {
+                "name": "owner",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedDestAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "nonce",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      {
+        "name": "fillPercents",
+        "type": "uint256[]",
+        "internalType": "uint256[]"
+      },
+      { "name": "amounts", "type": "uint256[]", "internalType": "uint256[]" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "areNoncesUsed",
+    "inputs": [
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "nonces", "type": "uint256[]", "internalType": "uint256[]" }
+    ],
+    "outputs": [{ "name": "used", "type": "bool[]", "internalType": "bool[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "invalidateNonce",
+    "inputs": [{ "name": "nonce", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "invalidateNonces",
+    "inputs": [{ "name": "nonces", "type": "uint256[]", "internalType": "uint256[]" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "isNonceUsed",
+    "inputs": [
+      { "name": "owner", "type": "address", "internalType": "address" },
+      { "name": "nonce", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "used", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "batchGetCollectedFees",
+    "inputs": [
+      { "name": "partner", "type": "address", "internalType": "address" },
+      { "name": "tokens", "type": "address[]", "internalType": "address[]" }
+    ],
+    "outputs": [{ "name": "amounts", "type": "uint256[]", "internalType": "uint256[]" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "batchWithdrawAllFees",
+    "inputs": [
+      { "name": "tokens", "type": "address[]", "internalType": "address[]" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "batchWithdrawAllProtocolFees",
+    "inputs": [
+      { "name": "tokens", "type": "address[]", "internalType": "address[]" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getCollectedFees",
+    "inputs": [
+      { "name": "partner", "type": "address", "internalType": "address" },
+      { "name": "token", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getProtocolFeeClaimer",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setProtocolFeeClaimer",
+    "inputs": [
+      {
+        "name": "protocolFeeClaimer",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawAllFees",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "amount", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawAllProtocolFees",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "amount", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawFees",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawProtocolFees",
+    "inputs": [
+      { "name": "token", "type": "address", "internalType": "address" },
+      { "name": "amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "recipient", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "version",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "string", "internalType": "string" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "OrderSettled",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "beneficiary",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "srcToken",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "destToken",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "srcAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "destAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "returnAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "protocolFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "partnerFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "orderHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "OrderPartiallyFilled",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "beneficiary",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "srcToken",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "destToken",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      },
+      {
+        "name": "srcAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "destAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "returnAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "protocolFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "partnerFee",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "totalFilledAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "orderHash",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NonceInvalidated",
+    "inputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "nonce",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FeeClaimerSet",
+    "inputs": [
+      {
+        "name": "feeClaimer",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "FeesWithdrawn",
+    "inputs": [
+      {
+        "name": "partner",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "amount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "recipient",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  { "type": "error", "name": "DeadlineExpired", "inputs": [] },
+  { "type": "error", "name": "InsufficientReturnAmount", "inputs": [] },
+  { "type": "error", "name": "InvalidNonce", "inputs": [] },
+  { "type": "error", "name": "InvalidShortString", "inputs": [] },
+  { "type": "error", "name": "InvalidSignature", "inputs": [] },
+  { "type": "error", "name": "InvalidSigner", "inputs": [] },
+  { "type": "error", "name": "InvalidFillAmount", "inputs": [] },
+  { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
+  {
+    "type": "error",
+    "name": "StringTooLong",
+    "inputs": [{ "name": "str", "type": "string", "internalType": "string" }]
+  },
+  { "type": "error", "name": "UnauthorizedAgent", "inputs": [] },
+  { "type": "error", "name": "InsufficientFees", "inputs": [] },
+  {
+    "type": "error",
+    "name": "UnauthorizedAccount",
+    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+  },
+  {
+    "type": "error",
+    "name": "UnauthorizedAccount",
+    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
+  }
+]
