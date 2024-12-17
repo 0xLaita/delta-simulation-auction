@@ -1,7 +1,7 @@
 import type { ChainTokensConfig, DeltaOrder, Token } from "@/common/types";
 import tokens from "@/lib/data/tokens.json";
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
-import { type HDNodeWallet, Signature, Wallet } from "ethers";
+import { type HDNodeWallet, Signature, Wallet, ethers } from "ethers";
 import { pino } from "pino";
 
 interface SignedOrder {
@@ -18,6 +18,9 @@ class OrderGenerator {
     const userAccount = this.generateRandomAccount();
     // generate random token pair for a trade
     const { srcToken, destToken, amount } = this.getRandomTokenTrade(chainId);
+    logger.info(
+      `Generating an order: ${ethers.formatUnits(amount, srcToken.decimals)} ${srcToken.symbol} -> ${destToken.symbol} for user ${userAccount.address}`,
+    );
     // get pricing for the pair
     const deltaPrice = await deltaAPI.getPrices({
       chainId,

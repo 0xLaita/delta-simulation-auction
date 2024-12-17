@@ -40,6 +40,7 @@ export class SimulationAuction {
   async simulateAuctionFlow() {
     // generate auction
     const deltaAuction = await this.generateAuction();
+    logger.info("Generated Delta Auction with trade");
     // query the agent for a bid
     const solution = await httpAgent.bid(this.chainId, deltaAuction.order);
     if (!solution) {
