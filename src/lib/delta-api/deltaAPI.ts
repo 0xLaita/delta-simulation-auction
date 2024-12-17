@@ -2,8 +2,7 @@ import type { DeltaOrder } from "@/common/types";
 import axios from "axios";
 import type { TypedDataDomain, TypedDataField } from "ethers";
 
-// const DELTA_API_URL = "https://api.paraswap.io/delta";
-const DELTA_API_URL = "http://staging-api-server.staging.paraswap.io.local/delta";
+const DELTA_API_URL = "https://api.paraswap.io/delta";
 
 interface DeltaPricingParams {
   chainId: number;
