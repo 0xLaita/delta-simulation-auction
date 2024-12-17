@@ -1,3 +1,23 @@
+export interface StateConfig {
+  balanceSlot: string;
+  allowanceSlot: string;
+}
+
+export interface AmountsConfig {
+  min: string;
+  max: string;
+}
+
+export interface TokenConfig {
+  symbol: string;
+  address: string;
+  decimals: number;
+  amounts: AmountsConfig;
+  state: StateConfig;
+}
+
+export type ChainTokensConfig = Record<number, Record<string, TokenConfig>>;
+
 export interface Token {
   name?: string;
   symbol: string;

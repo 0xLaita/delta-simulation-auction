@@ -1,12 +1,16 @@
-import type { DeltaOrder, Token } from "@/common/types";
+import type { ChainTokensConfig, DeltaOrder, Token } from "@/common/types";
+import tokens from "@/lib/data/tokens.json";
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
 import { type HDNodeWallet, Signature, Wallet } from "ethers";
+import { pino } from "pino";
 
 interface SignedOrder {
   order: DeltaOrder;
   signature: string;
   chainId: number;
 }
+
+const logger = pino({ name: "Order Generator" });
 
 class OrderGenerator {
   async generateSignedOrder(chainId: number): Promise<SignedOrder> {
@@ -47,19 +51,46 @@ class OrderGenerator {
   }
 
   private getRandomTokenTrade(chainId: number): { srcToken: Token; destToken: Token; amount: string } {
-    // todo: return from json config
+    const chainConfig = (tokens as ChainTokensConfig)[chainId];
+    // revert if there is no tokens for the chain
+    if (!chainConfig) {
+      const message = `Missing token config for chain ${chainId}!`;
+      logger.error(message);
+      throw new Error(message);
+    }
+    // get tokens from the config
+    const tokenAddresses = Object.keys(chainConfig);
+    // revert if there is not enough tokens
+    if (tokenAddresses.length < 2) {
+      const message = `Not enough tokens to generate a trade on chain ${chainId}!`;
+      logger.error(message);
+      throw new Error(message);
+    }
+    // get a random token as source token
+    const srcTokenAddress = tokenAddresses[Math.floor(Math.random() * tokenAddresses.length)];
+    // get a random token as destination token, making sure it is not the same as source
+    let destTokenAddress = tokenAddresses[Math.floor(Math.random() * tokenAddresses.length)];
+    // generate new until its unique
+    while (srcTokenAddress === destTokenAddress) {
+      destTokenAddress = tokenAddresses[Math.floor(Math.random() * tokenAddresses.length)];
+    }
+    // get the tokens
+    const srcToken = chainConfig[srcTokenAddress];
+    const destToken = chainConfig[destTokenAddress];
+    // generate the amount
+    const { min, max } = srcToken.amounts;
+    // get the range
+    const amountsDiff = BigInt(max) - BigInt(min);
+    // choose a random value in range
+    const percent = Math.floor(Math.random() * 100);
+    const randomValue = (amountsDiff * BigInt(percent)) / 100n;
+    // apply the value to get the amount
+    const amount = BigInt(min) + randomValue;
+
     return {
-      srcToken: {
-        symbol: "USDC",
-        address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-        decimals: 6,
-      },
-      destToken: {
-        symbol: "USDT",
-        address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-        decimals: 6,
-      },
-      amount: "100000000", // todo: randomize
+      srcToken,
+      destToken,
+      amount: amount.toString(),
     };
   }
 }
