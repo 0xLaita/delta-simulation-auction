@@ -62,7 +62,13 @@ export class RpcService {
           },
         };
 
-        return Tenderly.getInstance().simulateTransaction(simulationRequest);
+        await Tenderly.getInstance().simulateTransaction(simulationRequest);
+
+        return {
+          jsonrpc: call.jsonrpc,
+          id: call.id,
+          result: transaction.hash,
+        };
       }
       case "eth_estimateGas": {
         // decode the transaction data
