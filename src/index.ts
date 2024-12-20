@@ -9,6 +9,7 @@ const server = app.listen(env.PORT, () => {
 });
 
 const onCloseSignal = () => {
+  SimulationAuction.getInstance(env.CHAIN_ID).stop();
   logger.info("sigint received, shutting down");
   server.close(() => {
     logger.info("server closed");
