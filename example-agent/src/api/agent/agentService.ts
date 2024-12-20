@@ -1,4 +1,3 @@
-import AUGUSTUS_EXECUTOR from "@/common/abi/augustus-executor.json";
 import DELTA_ABI from "@/common/abi/delta.json";
 import { DELTA_ADDRESS, ZERO_ADDRESS } from "@/common/constants";
 import type { DeltaAuctionWithSignature, DeltaOrder, Solution } from "@/common/types";
