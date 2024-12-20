@@ -80,7 +80,7 @@ export class AgentService {
         fillPercent: 100,
       };
     } catch (e) {
-      logger.error(`Failed to provide a solution for order ${JSON.stringify(order)}`, e);
+      logger.error(`Failed to provide a solution for order ${JSON.stringify(order)}. Error: ${e}`);
       return null;
     }
   }
