@@ -16,7 +16,6 @@ export class HttpAgent implements Agent {
   constructor(
     private name: string,
     private url: string,
-    private address: string,
     private authHeaders?: AxiosRequestHeaders,
   ) {
     this.axiosInstance = axios.create({ headers: this.authHeaders });
@@ -53,4 +52,4 @@ export class HttpAgent implements Agent {
   }
 }
 
-export const httpAgent = new HttpAgent(env.AGENT_NAME, env.AGENT_URL, env.AGENT_ADDRESS);
+export const httpAgent = new HttpAgent(env.AGENT_NAME, env.AGENT_URL);
