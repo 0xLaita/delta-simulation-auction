@@ -38,22 +38,26 @@ export class SimulationAuction {
   }
 
   async simulateAuctionFlow() {
-    // generate auction
-    const deltaAuction = await this.generateAuction();
-    logger.info("Generated Delta Auction with trade");
-    // query the agent for a bid
-    const solution = await httpAgent.bid(this.chainId, deltaAuction.order);
-    if (!solution) {
-      // terminate if no solution was found
-      logger.error("Received no solution for generated auction, terminating the flow...");
-      return;
-    }
-    // skipping the competition, let the agent execute the order
-    const { success } = await httpAgent.execute(deltaAuction, solution);
-    if (success) {
-      logger.info("Successfully notified the agent to execute the order");
-    } else {
-      logger.error("Failed to notify the agent to execute the order");
+    try {
+      // generate auction
+      const deltaAuction = await this.generateAuction();
+      logger.info("Generated Delta Auction with trade");
+      // query the agent for a bid
+      const solution = await httpAgent.bid(this.chainId, deltaAuction.order);
+      if (!solution) {
+        // terminate if no solution was found
+        logger.error("Received no solution for generated auction, terminating the flow...");
+        return;
+      }
+      // skipping the competition, let the agent execute the order
+      const { success } = await httpAgent.execute(deltaAuction, solution);
+      if (success) {
+        logger.info("Successfully notified the agent to execute the order");
+      } else {
+        logger.error("Failed to notify the agent to execute the order");
+      }
+    } catch (e) {
+      logger.error(`Error simulating auction flow: ${e}`);
     }
   }
 
