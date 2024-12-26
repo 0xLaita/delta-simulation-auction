@@ -1,8 +1,36 @@
-export interface Token {
-  name?: string;
-  symbol: string;
-  address: string;
-  decimals: number;
+import type { SwapSide } from "@paraswap/sdk";
+
+export interface DeltaBidRequest {
+  chainId: number;
+  orders: DeltaBidOrder[];
+}
+
+export interface DeltaBidOrder {
+  orderId: string;
+  srcToken: string;
+  destToken: string;
+  side: SwapSide;
+  amount: string;
+  partiallyFillable: boolean;
+}
+
+export interface DeltaBidResponse {
+  chainId: number;
+  orders: Solution[];
+}
+
+export interface ExecuteRequest {
+  chainId: number;
+  orders: DeltaExecuteOrder[];
+}
+
+export interface DeltaExecuteOrder {
+  orderId: string;
+  orderData: DeltaOrder;
+  signature: string;
+  side: SwapSide;
+  partiallyFillable: boolean;
+  solution: Solution;
 }
 
 export interface DeltaOrder {
@@ -19,19 +47,8 @@ export interface DeltaOrder {
   permit: string;
 }
 
-export interface DeltaAuction {
-  id: string;
-  chainId: number;
-  order: DeltaOrder;
-}
-
-export type DeltaAuctionWithSignature = DeltaAuction & {
-  signature: string;
-};
-
 export interface Solution {
-  solver: string;
-  gas: number;
+  orderId: string;
   executedAmount: string;
   calldataToExecute: string;
   executionAddress: string;

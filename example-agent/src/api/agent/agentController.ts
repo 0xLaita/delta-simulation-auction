@@ -4,15 +4,13 @@ import { userService } from "@/api/agent/agentService";
 
 class AgentController {
   public bid: RequestHandler = async (req: Request, res: Response) => {
-    const { chainId, order, partner } = req.body;
-    const bid = await userService.bid(chainId, order, partner);
+    const bid = await userService.bid(req.body);
 
     return res.json(bid);
   };
 
   public execute: RequestHandler = async (req: Request, res: Response) => {
-    const { auction, solution } = req.body;
-    const success = await userService.execute(auction, solution);
+    const success = await userService.execute(req.body);
 
     return res.json({ success });
   };

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import type { DeltaAuctionWithSignature } from "@/common/types";
+import type { DeltaAuctionWithSignature, DeltaBidRequest, DeltaBidResponse, ExecuteRequest } from "@/common/types";
 import { env } from "@/common/utils/envConfig";
 import { orderGenerator } from "@/lib/simulation-auction/orderGenerator";
 import { pino } from "pino";
@@ -43,14 +43,16 @@ export class SimulationAuction {
       const deltaAuction = await this.generateAuction();
       logger.info("Generated Delta Auction with trade");
       // query the agent for a bid
-      const solution = await httpAgent.bid(this.chainId, deltaAuction.order);
+      const request = this.getBidRequest(deltaAuction);
+      const solution = await httpAgent.bid(request);
       if (!solution) {
         // terminate if no solution was found
         logger.error("Received no solution for generated auction, terminating the flow...");
         return;
       }
       // skipping the competition, let the agent execute the order
-      const { success } = await httpAgent.execute(deltaAuction, solution);
+      const executeRequest = this.getExecuteRequest(deltaAuction, solution);
+      const { success } = await httpAgent.execute(executeRequest);
       if (success) {
         logger.info("Successfully notified the agent to execute the order");
       } else {
@@ -70,6 +72,44 @@ export class SimulationAuction {
       chainId: this.chainId,
       order: order,
       signature,
+    };
+  }
+
+  private getBidRequest(auction: DeltaAuctionWithSignature): DeltaBidRequest {
+    return {
+      chainId: auction.chainId,
+      orders: [
+        {
+          orderId: auction.id,
+          srcToken: auction.order.srcToken,
+          destToken: auction.order.destToken,
+          side: "SELL",
+          amount: auction.order.srcAmount,
+          partiallyFillable: false,
+        },
+      ],
+    };
+  }
+
+  private getExecuteRequest(auction: DeltaAuctionWithSignature, bid: DeltaBidResponse): ExecuteRequest {
+    const solution = bid.orders.find((x) => x.orderId === auction.id);
+
+    if (!solution) {
+      throw new Error("No solution found for order ${auction.id}");
+    }
+
+    return {
+      chainId: this.chainId,
+      orders: [
+        {
+          orderId: solution.orderId,
+          orderData: auction.order,
+          signature: auction.signature,
+          side: "SELL",
+          partiallyFillable: false,
+          solution: solution,
+        },
+      ],
     };
   }
 }

@@ -1,3 +1,5 @@
+export type SwapSide = "BUY" | "SELL";
+
 export interface StateConfig {
   balanceSlot: string;
   allowanceSlot: string;
@@ -24,6 +26,37 @@ export interface Token {
   address: string;
   decimals: number;
 }
+export interface DeltaBidRequest {
+  chainId: number;
+  orders: DeltaBidOrder[];
+}
+
+export interface DeltaBidOrder {
+  orderId: string;
+  srcToken: string;
+  destToken: string;
+  side: SwapSide;
+  amount: string;
+  partiallyFillable: boolean;
+}
+
+export interface DeltaBidResponse {
+  orders: Solution[];
+}
+
+export interface ExecuteRequest {
+  chainId: number;
+  orders: DeltaExecuteOrder[];
+}
+
+export interface DeltaExecuteOrder {
+  orderId: string;
+  orderData: DeltaOrder;
+  signature: string;
+  side: SwapSide;
+  partiallyFillable: boolean;
+  solution: Solution;
+}
 
 export interface DeltaOrder {
   owner: string;
@@ -39,12 +72,6 @@ export interface DeltaOrder {
   permit: string;
 }
 
-export interface DeltaAuction {
-  id: string;
-  chainId: number;
-  order: DeltaOrder;
-}
-
 export interface DeltaAuctionWithSignature {
   id: string;
   chainId: number;
@@ -53,8 +80,7 @@ export interface DeltaAuctionWithSignature {
 }
 
 export interface Solution {
-  solver: string;
-  gas: number;
+  orderId: string;
   executedAmount: string;
   calldataToExecute: string;
   executionAddress: string;
