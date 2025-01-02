@@ -1,12 +1,13 @@
 import DELTA_ABI from "@/common/abi/delta.json";
 import { DELTA_ADDRESS, ZERO_ADDRESS } from "@/common/constants";
-import type {
-  DeltaBidOrder,
-  DeltaBidRequest,
-  DeltaBidResponse,
-  DeltaExecuteOrder,
-  ExecuteRequest,
-  Solution,
+import {
+  type DeltaBidOrder,
+  type DeltaBidRequest,
+  type DeltaBidResponse,
+  type DeltaExecuteOrder,
+  type ExecuteRequest,
+  SettlementType,
+  type Solution,
 } from "@/common/types";
 import { env } from "@/common/utils/envConfig";
 import { type SimpleFetchSDK, SwapSide, constructSimpleSDK } from "@paraswap/sdk";
@@ -108,6 +109,7 @@ export class AgentService {
         calldataToExecute: txParams.data,
         executionAddress: txParams.to,
         fillPercent: 100,
+        settlementType: SettlementType.Swap,
       };
     } catch (e) {
       logger.error(`Failed to provide a solution for order ${JSON.stringify(order)}. Error: ${e}`);
