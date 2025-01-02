@@ -47,10 +47,18 @@ export interface DeltaOrder {
   permit: string;
 }
 
+export const SettlementType = {
+  Swap: "SWAP",
+  Direct: "DIRECT",
+} as const;
+
+export type SettlementType = (typeof SettlementType)[keyof typeof SettlementType];
+
 export interface Solution {
   orderId: string;
   executedAmount: string;
   calldataToExecute: string;
   executionAddress: string;
+  settlementType: SettlementType;
   fillPercent?: number;
 }
