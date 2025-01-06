@@ -6,3 +6,4 @@ export const agentRouter: Router = express.Router();
 
 agentRouter.post("/bid", userController.bid);
 agentRouter.post("/execute", userController.execute);
+agentRouter.get("/quote", userController.quote);

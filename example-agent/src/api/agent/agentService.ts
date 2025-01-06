@@ -6,6 +6,8 @@ import {
   type DeltaBidResponse,
   type DeltaExecuteOrder,
   type ExecuteRequest,
+  type QuoteRequest,
+  type QuoteResponse,
   SettlementType,
   type Solution,
 } from "@/common/types";
@@ -58,7 +60,7 @@ export class AgentService {
     };
   }
 
-  async execute(request: ExecuteRequest) {
+  public async execute(request: ExecuteRequest) {
     for (const order of request.orders) {
       try {
         logger.info(`Executing the auction ${order.orderId}`);
@@ -77,6 +79,26 @@ export class AgentService {
     }
 
     return true;
+  }
+
+  public async quote(request: QuoteRequest): Promise<QuoteResponse> {
+    const { srcToken, destToken, amount, chainId } = request;
+    const sdk = this.getSDK(chainId);
+
+    const priceRoute = await sdk.swap.getRate({
+      srcToken,
+      destToken,
+      amount,
+      side: request.side,
+    });
+
+    return {
+      srcToken,
+      destToken,
+      srcAmount: priceRoute.srcAmount,
+      destAmount: priceRoute.destAmount,
+      gas: priceRoute.gasCost,
+    };
   }
 
   private async bidSingle(chainId: number, order: DeltaBidOrder): Promise<Solution | null> {

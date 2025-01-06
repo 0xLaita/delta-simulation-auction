@@ -62,3 +62,21 @@ export interface Solution {
   settlementType: SettlementType;
   fillPercent?: number;
 }
+
+export type QuoteRequest = {
+  srcToken: string;
+  destToken: string;
+  amount: string;
+  srcDecimals?: number;
+  destDecimals?: number;
+  side: SwapSide;
+  chainId: number;
+};
+
+export type QuoteResponse = {
+  srcToken: string;
+  destToken: string;
+  srcAmount: string;
+  destAmount: string;
+  gas: string;
+};
