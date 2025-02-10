@@ -93,7 +93,7 @@ export class SimulationAuction {
   }
 
   private getExecuteRequest(auction: DeltaAuctionWithSignature, bid: DeltaBidResponse): ExecuteRequest {
-    const solution = bid.orders.find((x) => x.orderId === auction.id);
+    const solution = bid.solutions.find((x) => x.orderId === auction.id);
 
     if (!solution) {
       throw new Error("No solution found for order ${auction.id}");

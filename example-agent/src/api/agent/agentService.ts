@@ -56,7 +56,7 @@ export class AgentService {
 
     return {
       chainId,
-      orders: solutions.filter((solution) => solution !== null) as Solution[],
+      solutions: solutions.filter((solution) => solution !== null) as Solution[],
     };
   }
 
