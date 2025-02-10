@@ -10,7 +10,10 @@ export interface DeltaBidOrder {
   srcToken: string;
   destToken: string;
   side: SwapSide;
-  amount: string;
+  // for SELL, `destAmount` means minDestAmount,
+  // and for BUY, `srcAmount` means maxSrcAmount
+  srcAmount: string;
+  destAmount: string;
   partiallyFillable: boolean;
 }
 
@@ -26,7 +29,7 @@ export interface ExecuteRequest {
 
 export interface DeltaExecuteOrder {
   orderId: string;
-  orderData: DeltaOrder;
+  orderData: OnChainDeltaOrderData;
   signature: string;
   side: SwapSide;
   partiallyFillable: boolean;
@@ -46,6 +49,10 @@ export interface DeltaOrder {
   partnerAndFee: string;
   permit: string;
 }
+
+export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
+  expectedAmount: string;
+};
 
 export const SettlementType = {
   Swap: "SWAP",

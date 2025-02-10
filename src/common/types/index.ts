@@ -31,12 +31,16 @@ export interface DeltaBidRequest {
   orders: DeltaBidOrder[];
 }
 
+// Order data sent to agents during bidding stage
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
   destToken: string;
   side: SwapSide;
-  amount: string;
+  // for SELL, `destAmount` means minDestAmount,
+  // and for BUY, `srcAmount` means maxSrcAmount
+  srcAmount: string;
+  destAmount: string;
   partiallyFillable: boolean;
 }
 
@@ -51,7 +55,7 @@ export interface ExecuteRequest {
 
 export interface DeltaExecuteOrder {
   orderId: string;
-  orderData: DeltaOrder;
+  orderData: OnChainDeltaOrderData;
   signature: string;
   side: SwapSide;
   partiallyFillable: boolean;
@@ -71,6 +75,11 @@ export interface DeltaOrder {
   partnerAndFee: string;
   permit: string;
 }
+
+// todo: remove this and use `Order` type after BUY release
+export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
+  expectedAmount: string;
+};
 
 export interface DeltaAuctionWithSignature {
   id: string;

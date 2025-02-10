@@ -102,7 +102,7 @@ export class AgentService {
   }
 
   private async bidSingle(chainId: number, order: DeltaBidOrder): Promise<Solution | null> {
-    const { srcToken, destToken, amount } = order;
+    const { srcToken, destToken, srcAmount: amount } = order;
     logger.info(`Received an order for bid: ${amount} ${srcToken} -> ${destToken}`);
 
     try {

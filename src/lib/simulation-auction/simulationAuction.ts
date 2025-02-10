@@ -84,7 +84,8 @@ export class SimulationAuction {
           srcToken: auction.order.srcToken,
           destToken: auction.order.destToken,
           side: "SELL",
-          amount: auction.order.srcAmount,
+          srcAmount: auction.order.srcAmount,
+          destAmount: auction.order.destAmount,
           partiallyFillable: false,
         },
       ],
@@ -103,7 +104,7 @@ export class SimulationAuction {
       orders: [
         {
           orderId: solution.orderId,
-          orderData: auction.order,
+          orderData: { ...auction.order, expectedAmount: auction.order.expectedDestAmount },
           signature: auction.signature,
           side: "SELL",
           partiallyFillable: false,
