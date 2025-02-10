@@ -1,37 +1,10 @@
-export type SwapSide = "BUY" | "SELL";
+import type { SwapSide } from "@paraswap/sdk";
 
-export interface StateConfig {
-  balanceSlot: string;
-  allowanceSlot: string;
-}
-
-export interface AmountsConfig {
-  min: string;
-  max: string;
-}
-
-export interface TokenConfig {
-  symbol: string;
-  address: string;
-  decimals: number;
-  amounts: AmountsConfig;
-  state: StateConfig;
-}
-
-export type ChainTokensConfig = Record<number, Record<string, TokenConfig>>;
-
-export interface Token {
-  name?: string;
-  symbol: string;
-  address: string;
-  decimals: number;
-}
 export interface DeltaBidRequest {
   chainId: number;
   orders: DeltaBidOrder[];
 }
 
-// Order data sent to agents during bidding stage
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
@@ -45,6 +18,7 @@ export interface DeltaBidOrder {
 }
 
 export interface DeltaBidResponse {
+  chainId: number;
   solutions: Solution[];
 }
 
@@ -76,17 +50,9 @@ export interface DeltaOrder {
   permit: string;
 }
 
-// todo: remove this and use `Order` type after BUY release
 export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
   expectedAmount: string;
 };
-
-export interface DeltaAuctionWithSignature {
-  id: string;
-  chainId: number;
-  order: DeltaOrder;
-  signature: string;
-}
 
 export const SettlementType = {
   Swap: "SWAP",
@@ -103,3 +69,21 @@ export interface Solution {
   settlementType: SettlementType;
   fillPercent?: number;
 }
+
+export type QuoteRequest = {
+  srcToken: string;
+  destToken: string;
+  amount: string;
+  srcDecimals?: number;
+  destDecimals?: number;
+  side: SwapSide;
+  chainId: number;
+};
+
+export type QuoteResponse = {
+  srcToken: string;
+  destToken: string;
+  srcAmount: string;
+  destAmount: string;
+  gas: string;
+};

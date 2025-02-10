@@ -10,12 +10,5 @@ export const env = cleanEnv(process.env, {
   CORS_ORIGIN: str({ devDefault: testOnly("http://localhost:3000") }),
   COMMON_RATE_LIMIT_MAX_REQUESTS: num({ devDefault: testOnly(1000) }),
   COMMON_RATE_LIMIT_WINDOW_MS: num({ devDefault: testOnly(1000) }),
-  CHAIN_ID: num(),
-  AGENT_NAME: str(),
-  AGENT_URL: url(),
-  AUCTION_GENERATION_INTERVAL_MS: num({ default: 10_000 }),
-  RPC_URL: str(),
-  TENDERLY_ACCOUNT_SLUG: str(),
-  TENDERLY_PROJECT_SLUG: str(),
-  TENDERLY_ACCESS_TOKEN: str(),
+  RPC_URL: url(),
 });

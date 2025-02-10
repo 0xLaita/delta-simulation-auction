@@ -15,108 +15,126 @@ const deltaAddress = "0x0000000000bbf5c5fd284e657f01bd000933c96d";
 
 export class RpcService {
   async process(call: Call) {
-    // simulate `eth_sendRawTransaction` with tenderly
-    // override state for `eth_call` and `eth_estimateGas`
-    // for everything else, just forward to actual RPC
-    switch (call.method) {
-      case "eth_sendRawTransaction": {
-        // decode the transaction data
-        const transaction = this.decodeRawTransaction(call.params[0]);
-        const chainId = Number(transaction.chainId);
-        // decode the settlement data
-        const { orderWithSig } = this.decodeSettlementTransactionData(transaction.data);
-        // get values needed for state overrides
-        const agentAddress = transaction.from!; // needed for overriding agent registry
-        const { srcToken, srcAmount, owner } = orderWithSig.order; // needed for overriding balance and allowance
-        // get amount to set balance and allowance to
-        const fundAmount = BigInt(srcAmount) * 2n;
-        const funcAmountEncoded = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [fundAmount]);
-        // get token state slots to override
-        const tokenSlots = stateOverrideHelpers.getTokenBalanceAllowanceSlots(chainId, srcToken);
-        const balanceSlot = stateOverrideHelpers.calculateAddressBalanceSlot(tokenSlots.balanceSlot, owner);
-        const allowanceSlot = stateOverrideHelpers.calculateAddressAllowanceSlot(
-          tokenSlots.allowanceSlot,
-          owner,
-          deltaAddress,
-        );
-        // get agent registry slot to override
-        const agentRegistrySlot = stateOverrideHelpers.calculateAgentRegistrySlot(agentAddress);
-        // build simulation transaction request
-        const simulationRequest = {
-          to: transaction.to,
-          from: transaction.from,
-          data: transaction.data,
-          chainId: Number(transaction.chainId),
-          stateOverride: {
-            [srcToken]: {
-              storage: {
-                [balanceSlot]: funcAmountEncoded,
-                [allowanceSlot]: funcAmountEncoded,
+    try {
+      // simulate `eth_sendRawTransaction` with tenderly
+      // override state for `eth_call` and `eth_estimateGas`
+      // for everything else, just forward to actual RPC
+      switch (call.method) {
+        case "eth_sendRawTransaction": {
+          // decode the transaction data
+          const transaction = this.decodeRawTransaction(call.params[0]);
+          const chainId = Number(transaction.chainId);
+          // decode the settlement data
+          const { orderWithSig } = this.decodeSettlementTransactionData(transaction.data);
+          // get values needed for state overrides
+          const agentAddress = transaction.from!; // needed for overriding agent registry
+          const { srcToken, srcAmount, owner } = orderWithSig.order; // needed for overriding balance and allowance
+          // get amount to set balance and allowance to
+          const fundAmount = BigInt(srcAmount) * 2n;
+          const funcAmountEncoded = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [fundAmount]);
+          // get token state slots to override
+          const tokenSlots = stateOverrideHelpers.getTokenBalanceAllowanceSlots(chainId, srcToken);
+          const balanceSlot = stateOverrideHelpers.calculateAddressBalanceSlot(tokenSlots.balanceSlot, owner);
+          const allowanceSlot = stateOverrideHelpers.calculateAddressAllowanceSlot(
+            tokenSlots.allowanceSlot,
+            owner,
+            deltaAddress,
+          );
+          // get agent registry slot to override
+          const agentRegistrySlot = stateOverrideHelpers.calculateAgentRegistrySlot(agentAddress);
+          // build simulation transaction request
+          const simulationRequest = {
+            to: transaction.to,
+            from: transaction.from,
+            data: transaction.data,
+            chainId: Number(transaction.chainId),
+            stateOverride: {
+              [srcToken]: {
+                storage: {
+                  [balanceSlot]: funcAmountEncoded,
+                  [allowanceSlot]: funcAmountEncoded,
+                },
+              },
+              [portikusAddress]: {
+                storage: {
+                  [agentRegistrySlot]: ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true]),
+                },
               },
             },
-            [portikusAddress]: {
-              storage: {
-                [agentRegistrySlot]: ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true]),
-              },
-            },
-          },
-        };
+          };
 
-        return Tenderly.getInstance().simulateTransaction(simulationRequest);
-      }
-      case "eth_estimateGas": {
-        // decode the transaction data
-        const { from, to, data, value } = call.params[0];
-        const chainId = Number(env.CHAIN_ID);
-        // decode the settlement data
-        const { orderWithSig } = this.decodeSettlementTransactionData(data);
-        // get values needed for state overrides
-        const agentAddress = from; // needed for overriding agent registry
-        const { srcToken, srcAmount, owner } = orderWithSig.order; // needed for overriding balance and allowance
-        // get amount to set balance and allowance to
-        const fundAmount = BigInt(srcAmount) * 2n;
-        const funcAmountEncoded = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [fundAmount]);
-        // get token state slots to override
-        const tokenSlots = stateOverrideHelpers.getTokenBalanceAllowanceSlots(chainId, srcToken);
-        const balanceSlot = stateOverrideHelpers.calculateAddressBalanceSlot(tokenSlots.balanceSlot, owner);
-        const allowanceSlot = stateOverrideHelpers.calculateAddressAllowanceSlot(
-          tokenSlots.allowanceSlot,
-          owner,
-          deltaAddress,
-        );
-        // get agent registry slot to override
-        const agentRegistrySlot = stateOverrideHelpers.calculateAgentRegistrySlot(agentAddress);
-        // build state override object
-        // build simulation transaction request
-        const simulationRequest = {
-          to: to,
-          from: from,
-          data: data,
-          chainId: chainId,
-          stateOverride: {
-            [srcToken]: {
-              storage: {
-                [balanceSlot]: funcAmountEncoded,
-                [allowanceSlot]: funcAmountEncoded,
-              },
-            },
-            [portikusAddress]: {
-              storage: {
-                [agentRegistrySlot]: ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true]),
-              },
-            },
-          },
-        };
-        const result = await Tenderly.getInstance().estimateTransaction(simulationRequest);
+          await Tenderly.getInstance().simulateTransaction(simulationRequest);
 
-        return {
-          jsonrpc: call.jsonrpc,
-          id: call.id,
-          result,
-        };
+          return {
+            jsonrpc: call.jsonrpc,
+            id: call.id,
+            result: transaction.hash,
+          };
+        }
+        case "eth_estimateGas": {
+          // decode the transaction data
+          const { from, to, data, value } = call.params[0];
+          const chainId = Number(env.CHAIN_ID);
+          // decode the settlement data
+          const { orderWithSig } = this.decodeSettlementTransactionData(data);
+          // get values needed for state overrides
+          const agentAddress = from; // needed for overriding agent registry
+          const { srcToken, srcAmount, owner } = orderWithSig.order; // needed for overriding balance and allowance
+          // get amount to set balance and allowance to
+          const fundAmount = BigInt(srcAmount) * 2n;
+          const funcAmountEncoded = ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [fundAmount]);
+          // get token state slots to override
+          const tokenSlots = stateOverrideHelpers.getTokenBalanceAllowanceSlots(chainId, srcToken);
+          const balanceSlot = stateOverrideHelpers.calculateAddressBalanceSlot(tokenSlots.balanceSlot, owner);
+          const allowanceSlot = stateOverrideHelpers.calculateAddressAllowanceSlot(
+            tokenSlots.allowanceSlot,
+            owner,
+            deltaAddress,
+          );
+          // get agent registry slot to override
+          const agentRegistrySlot = stateOverrideHelpers.calculateAgentRegistrySlot(agentAddress);
+          // build state override object
+          // build simulation transaction request
+          const simulationRequest = {
+            to: to,
+            from: from,
+            data: data,
+            chainId: chainId,
+            stateOverride: {
+              [srcToken]: {
+                storage: {
+                  [balanceSlot]: funcAmountEncoded,
+                  [allowanceSlot]: funcAmountEncoded,
+                },
+              },
+              [portikusAddress]: {
+                storage: {
+                  [agentRegistrySlot]: ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true]),
+                },
+              },
+            },
+          };
+          const result = await Tenderly.getInstance().estimateTransaction(simulationRequest);
+
+          return {
+            jsonrpc: call.jsonrpc,
+            id: call.id,
+            result,
+          };
+        }
+        default:
+          return this.forwardToRPC(call);
       }
-      default:
-        return this.forwardToRPC(call);
+    } catch (e) {
+      logger.error(`Error processing the PRC call. Call: ${JSON.stringify(call)}, error: ${e}`);
+      return {
+        jsonrpc: call.jsonrpc,
+        id: call.id,
+        error: {
+          code: -32603, // Internal error
+          message: "Rpc call failed",
+        },
+      };
     }
   }
 

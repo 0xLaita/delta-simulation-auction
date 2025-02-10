@@ -1,11 +1,18 @@
-import type { DeltaAuctionWithSignature, DeltaOrder, Solution } from "@/common/types";
+import type {
+  DeltaAuctionWithSignature,
+  DeltaBidRequest,
+  DeltaBidResponse,
+  DeltaOrder,
+  ExecuteRequest,
+  Solution,
+} from "@/common/types";
 import { env } from "@/common/utils/envConfig";
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
 import { pino } from "pino";
 
 interface Agent {
-  bid(chainId: number, order: DeltaOrder, partner: string): Promise<Solution | null>;
-  execute(auction: DeltaAuctionWithSignature, solution: Solution): Promise<{ success: boolean }>;
+  bid(request: DeltaBidRequest): Promise<DeltaBidResponse | null>;
+  execute(request: ExecuteRequest): Promise<{ success: boolean }>;
 }
 
 const logger = pino({ name: "Agent" });
@@ -16,35 +23,31 @@ export class HttpAgent implements Agent {
   constructor(
     private name: string,
     private url: string,
-    private address: string,
     private authHeaders?: AxiosRequestHeaders,
   ) {
     this.axiosInstance = axios.create({ headers: this.authHeaders });
   }
 
-  async bid(chainId: number, order: DeltaOrder, partner = "anon"): Promise<Solution | null> {
+  async bid(request: DeltaBidRequest): Promise<DeltaBidResponse | null> {
     try {
-      const { data } = await this.axiosInstance.post<Solution | null>(`${this.url}/bid`, { chainId, order, partner });
+      const { data } = await this.axiosInstance.post<DeltaBidResponse | null>(`${this.url}/bid`, request);
 
       // todo: add return data validation
 
       return data;
     } catch (e) {
-      logger.error(`Failed to provide a solution for order ${JSON.stringify(order)}`, e);
+      logger.error(`Failed to provide a solution for request ${JSON.stringify(request)}. Error: ${e}`);
       return null;
     }
   }
 
-  async execute(auction: DeltaAuctionWithSignature, solution: Solution): Promise<{ success: boolean }> {
+  async execute(request: ExecuteRequest): Promise<{ success: boolean }> {
     try {
-      const { data } = await this.axiosInstance.post<{ success: true }>(`${this.url}/execute`, {
-        auction,
-        solution,
-      });
+      const { data } = await this.axiosInstance.post<{ success: true }>(`${this.url}/execute`, request);
 
       return data;
     } catch (e) {
-      logger.error(`Execute failed for agent ${this.name} for auction ${auction.id}`);
+      logger.error(`Execute failed for agent ${this.name} for request ${request}. Error: ${e}`);
 
       return {
         success: false,
@@ -53,4 +56,4 @@ export class HttpAgent implements Agent {
   }
 }
 
-export const httpAgent = new HttpAgent(env.AGENT_NAME, env.AGENT_URL, env.AGENT_ADDRESS);
+export const httpAgent = new HttpAgent(env.AGENT_NAME, env.AGENT_URL);
