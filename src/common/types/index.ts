@@ -45,7 +45,7 @@ export interface DeltaBidOrder {
 }
 
 export interface DeltaBidResponse {
-  orders: Solution[];
+  solutions: Solution[];
 }
 
 export interface ExecuteRequest {
