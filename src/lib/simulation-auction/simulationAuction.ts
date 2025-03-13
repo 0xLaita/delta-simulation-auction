@@ -109,6 +109,7 @@ export class SimulationAuction {
           side: "SELL",
           partiallyFillable: false,
           solution: solution,
+          bridgeDataEncoded: "0x",
         },
       ],
     };

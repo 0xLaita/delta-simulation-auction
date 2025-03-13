@@ -5,6 +5,13 @@ export interface DeltaBidRequest {
   orders: DeltaBidOrder[];
 }
 
+export interface DeltaBridge {
+  maxRelayerFee: string;
+  destinationChainId: number;
+  outputToken: string;
+  multiCallHandler: string;
+}
+
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
@@ -34,6 +41,7 @@ export interface DeltaExecuteOrder {
   side: SwapSide;
   partiallyFillable: boolean;
   solution: Solution;
+  bridgeDataEncoded: string;
 }
 
 export interface DeltaOrder {
@@ -48,6 +56,7 @@ export interface DeltaOrder {
   nonce: string;
   partnerAndFee: string;
   permit: string;
+  bridge: DeltaBridge;
 }
 
 export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {

@@ -38,18 +38,6 @@ export class AgentService {
   private sdks: Record<number, SimpleFetchSDK> = {};
   private wallet = Wallet.createRandom();
 
-  private getSDK(chainId: number): SimpleFetchSDK {
-    if (!this.sdks[chainId]) {
-      this.sdks[chainId] = constructSimpleSDK({
-        version: "6.2",
-        chainId,
-        axios,
-      });
-    }
-
-    return this.sdks[chainId];
-  }
-
   public async bid(request: DeltaBidRequest): Promise<DeltaBidResponse> {
     const { chainId, orders } = request;
     const solutions = await Promise.all(orders.map((order) => this.bidSingle(chainId, order)));
@@ -99,6 +87,18 @@ export class AgentService {
       destAmount: priceRoute.destAmount,
       gas: priceRoute.gasCost,
     };
+  }
+
+  private getSDK(chainId: number): SimpleFetchSDK {
+    if (!this.sdks[chainId]) {
+      this.sdks[chainId] = constructSimpleSDK({
+        version: "6.2",
+        chainId,
+        axios,
+      });
+    }
+
+    return this.sdks[chainId];
   }
 
   private async bidSingle(chainId: number, order: DeltaBidOrder): Promise<Solution | null> {
@@ -156,10 +156,12 @@ export class AgentService {
       ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
       [executorData],
     );
+
     const data = deltaInterface.encodeFunctionData("swapSettle", [
       orderWithSig,
       executorDataEncoded,
       AUGUSTUS_EXECUTOR_ADDRESS,
+      order.bridgeDataEncoded,
     ]);
 
     return {

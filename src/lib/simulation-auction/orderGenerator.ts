@@ -3,6 +3,7 @@ import tokens from "@/lib/data/tokens.json";
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
 import { type HDNodeWallet, Signature, Wallet, ethers } from "ethers";
 import { pino } from "pino";
+import { ZERO_ADDRESS } from "../../../example-agent/src/common/constants";
 
 interface SignedOrder {
   order: DeltaOrder;
@@ -36,6 +37,12 @@ class OrderGenerator {
       price: deltaPrice,
       owner: userAccount.address,
       chainId,
+      bridge: {
+        maxRelayerFee: "0",
+        destinationChainId: 0,
+        outputToken: ZERO_ADDRESS,
+        multiCallHandler: ZERO_ADDRESS,
+      },
     });
     // sign the order
     const signature = await userAccount.signTypedData(toSign.domain, toSign.types, toSign.value);
