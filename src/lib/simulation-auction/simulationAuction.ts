@@ -7,6 +7,8 @@ import { httpAgent } from "./httpAgent";
 
 const logger = pino({ name: "Simulation Auction" });
 
+const DELTA_GAS_OVERHEAD = 250_000;
+
 export class SimulationAuction {
   // static props
   static instances: Record<number, SimulationAuction> = {};
@@ -87,6 +89,7 @@ export class SimulationAuction {
           srcAmount: auction.order.srcAmount,
           destAmount: auction.order.destAmount,
           partiallyFillable: false,
+          overhead: DELTA_GAS_OVERHEAD,
         },
       ],
     };

@@ -42,6 +42,7 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
+  overhead?: number;
 }
 
 export interface DeltaBidResponse {
