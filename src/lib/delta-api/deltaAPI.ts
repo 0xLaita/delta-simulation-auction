@@ -1,4 +1,4 @@
-import type { DeltaOrder } from "@/common/types";
+import type { DeltaBridge, DeltaOrder } from "@/common/types";
 import axios from "axios";
 import type { TypedDataDomain, TypedDataField } from "ethers";
 
@@ -29,6 +29,7 @@ interface DeltaBuildOrderParams {
   partnerTakesSurplus?: boolean;
   slippage?: number;
   partiallyFillable?: boolean;
+  bridge: DeltaBridge;
 }
 
 interface DeltaPrices {

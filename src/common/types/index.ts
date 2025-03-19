@@ -42,6 +42,7 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
+  overhead?: number;
 }
 
 export interface DeltaBidResponse {
@@ -60,6 +61,14 @@ export interface DeltaExecuteOrder {
   side: SwapSide;
   partiallyFillable: boolean;
   solution: Solution;
+  bridgeDataEncoded: string;
+}
+
+export interface DeltaBridge {
+  maxRelayerFee: string;
+  destinationChainId: number;
+  outputToken: string;
+  multiCallHandler: string;
 }
 
 export interface DeltaOrder {
@@ -74,6 +83,7 @@ export interface DeltaOrder {
   nonce: string;
   partnerAndFee: string;
   permit: string;
+  bridge: DeltaBridge;
 }
 
 // todo: remove this and use `Order` type after BUY release
