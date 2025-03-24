@@ -89,7 +89,9 @@ export class SimulationAuction {
           srcAmount: auction.order.srcAmount,
           destAmount: auction.order.destAmount,
           partiallyFillable: false,
-          overhead: DELTA_GAS_OVERHEAD,
+          metadata: {
+            deltaGasOverhead: DELTA_GAS_OVERHEAD,
+          },
         },
       ],
     };

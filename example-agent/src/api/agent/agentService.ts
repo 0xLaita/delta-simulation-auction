@@ -118,7 +118,7 @@ export class AgentService {
       });
 
       const executedAmountRaw = BigInt(priceRoute.destAmount);
-      const totalGas = BigInt(priceRoute.gasCost) + BigInt(order.overhead ?? DELTA_GAS_OVERHEAD);
+      const totalGas = BigInt(priceRoute.gasCost) + BigInt(order.metadata.deltaGasOverhead ?? DELTA_GAS_OVERHEAD);
       const totalGasFeeInToken = await this.gasToFee(chainId, totalGas.toString(), destToken);
 
       const executedAmount = executedAmountRaw - BigInt(totalGasFeeInToken);

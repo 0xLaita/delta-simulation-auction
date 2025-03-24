@@ -31,6 +31,10 @@ export interface DeltaBidRequest {
   orders: DeltaBidOrder[];
 }
 
+export interface DeltaBidOrderMetadata {
+  deltaGasOverhead?: number | null;
+}
+
 // Order data sent to agents during bidding stage
 export interface DeltaBidOrder {
   orderId: string;
@@ -42,7 +46,7 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
-  overhead?: number;
+  metadata: DeltaBidOrderMetadata;
 }
 
 export interface DeltaBidResponse {

@@ -12,6 +12,10 @@ export interface DeltaBridge {
   multiCallHandler: string;
 }
 
+export interface DeltaBidOrderMetadata {
+  deltaGasOverhead?: number | null;
+}
+
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
@@ -22,7 +26,7 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
-  overhead: number;
+  metadata: DeltaBidOrderMetadata;
 }
 
 export interface DeltaBidResponse {
