@@ -56,11 +56,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -96,24 +92,52 @@
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
-              },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
         ]
       },
       { "name": "executorData", "type": "bytes", "internalType": "bytes" },
-      { "name": "executor", "type": "address", "internalType": "address" }
+      { "name": "executor", "type": "address", "internalType": "address" },
+      {
+        "name": "bridgeData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"
@@ -182,7 +206,34 @@
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -193,7 +244,12 @@
         "type": "bytes[]",
         "internalType": "bytes[]"
       },
-      { "name": "executor", "type": "address", "internalType": "address" }
+      { "name": "executor", "type": "address", "internalType": "address" },
+      {
+        "name": "bridgeData",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
     ],
     "outputs": [],
     "stateMutability": "nonpayable"

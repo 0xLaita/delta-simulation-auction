@@ -38,18 +38,6 @@ export class AgentService {
   private sdks: Record<number, SimpleFetchSDK> = {};
   private wallet = Wallet.createRandom();
 
-  private getSDK(chainId: number): SimpleFetchSDK {
-    if (!this.sdks[chainId]) {
-      this.sdks[chainId] = constructSimpleSDK({
-        version: "6.2",
-        chainId,
-        axios,
-      });
-    }
-
-    return this.sdks[chainId];
-  }
-
   public async bid(request: DeltaBidRequest): Promise<DeltaBidResponse> {
     const { chainId, orders } = request;
     const solutions = await Promise.all(orders.map((order) => this.bidSingle(chainId, order)));
@@ -101,6 +89,18 @@ export class AgentService {
     };
   }
 
+  private getSDK(chainId: number): SimpleFetchSDK {
+    if (!this.sdks[chainId]) {
+      this.sdks[chainId] = constructSimpleSDK({
+        version: "6.2",
+        chainId,
+        axios,
+      });
+    }
+
+    return this.sdks[chainId];
+  }
+
   private async bidSingle(chainId: number, order: DeltaBidOrder): Promise<Solution | null> {
     const { srcToken, destToken, srcAmount: amount } = order;
     logger.info(`Received an order for bid: ${amount} ${srcToken} -> ${destToken}`);
@@ -118,7 +118,7 @@ export class AgentService {
       });
 
       const executedAmountRaw = BigInt(priceRoute.destAmount);
-      const totalGas = BigInt(priceRoute.gasCost) + DELTA_GAS_OVERHEAD;
+      const totalGas = BigInt(priceRoute.gasCost) + BigInt(order.metadata.deltaGasOverhead ?? DELTA_GAS_OVERHEAD);
       const totalGasFeeInToken = await this.gasToFee(chainId, totalGas.toString(), destToken);
 
       const executedAmount = executedAmountRaw - BigInt(totalGasFeeInToken);
@@ -156,10 +156,12 @@ export class AgentService {
       ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
       [executorData],
     );
+
     const data = deltaInterface.encodeFunctionData("swapSettle", [
       orderWithSig,
       executorDataEncoded,
       AUGUSTUS_EXECUTOR_ADDRESS,
+      order.bridgeDataEncoded,
     ]);
 
     return {

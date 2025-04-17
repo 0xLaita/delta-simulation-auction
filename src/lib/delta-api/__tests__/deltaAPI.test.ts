@@ -1,5 +1,6 @@
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
 import { Wallet } from "ethers";
+import { ZERO_ADDRESS } from "../../../../example-agent/src/common/constants";
 
 describe("DeltaAPI", () => {
   const chainId = 1;
@@ -42,6 +43,12 @@ describe("DeltaAPI", () => {
         price,
         chainId,
         owner: USDC,
+        bridge: {
+          destinationChainId: 0,
+          maxRelayerFee: "0",
+          multiCallHandler: ZERO_ADDRESS,
+          outputToken: ZERO_ADDRESS,
+        },
       });
 
       // todo: assert schema
