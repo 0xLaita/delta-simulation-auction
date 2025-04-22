@@ -5,6 +5,9 @@ import { env } from "@/common/utils/envConfig";
 import { ETHER_ADDRESS } from "@/lib/constants";
 import axios from "axios";
 import { ethers } from "ethers";
+import { pino } from "pino";
+
+const logger = pino({ name: "Tenderly Simulator" });
 
 const ACCOUNT_SLUG = env.TENDERLY_ACCOUNT_SLUG;
 const PROJECT_SLUG = env.TENDERLY_PROJECT_SLUG;
@@ -165,6 +168,7 @@ export class TenderlySimulator {
   // public constants
   static readonly DEFAULT_OWNER = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
   static readonly DEFAULT_SPENDER = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+  static readonly AGENT_REGISTRY_MAPPING_SLOT = "0x0000000000000000000000000000000000000000000000000000000000000002";
 
   // singleton
   private static instance: TenderlySimulator;
@@ -191,9 +195,6 @@ export class TenderlySimulator {
       state_objects: request.stateOverride,
     };
 
-    console.log("Sending transaction simulation with params:");
-    console.log(JSON.stringify(data, null, 2));
-
     const response = await axios.request({
       method: "POST",
       url: `https://api.tenderly.co/api/v1/account/${ACCOUNT_SLUG}/project/${PROJECT_SLUG}/simulate`,
@@ -203,13 +204,11 @@ export class TenderlySimulator {
       data,
     });
 
-    const simulation = response.data.simulation as Simulation;
-    const url = `https://dashboard.tenderly.co/${ACCOUNT_SLUG}/${PROJECT_SLUG}/simulator/${simulation.id}`;
+    return response.data.simulation as Simulation;
+  }
 
-    console.log("Successfully simulated a transaction:");
-    console.log(`Simulation URL - ${url}`);
-
-    return simulation;
+  public getSimulationUrl(simulation: Simulation): string {
+    return `https://dashboard.tenderly.co/${ACCOUNT_SLUG}/${PROJECT_SLUG}/simulator/${simulation.id}`;
   }
 
   public async getSimulatedTransactionDetails(id: string): Promise<SimulatedTransactionDetails | null> {
@@ -222,7 +221,7 @@ export class TenderlySimulator {
 
       return data;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return null;
     }
   }
@@ -550,5 +549,21 @@ export class TenderlySimulator {
     stateOverride[token] ||= {};
     stateOverride[token].storage ||= {};
     stateOverride[token].storage[slotToOverride] = ethers.AbiCoder.defaultAbiCoder().encode(["uint"], [amount]);
+  }
+
+  /**
+   * Adds agent registry override to an existing `StateOverride` object
+   * @param stateOverride object to add the override to
+   * @param portikusAddress address of Portikus contract
+   * @param agent agent address
+   */
+  addAgentRegistryOverride(stateOverride: StateOverride, portikusAddress: string, agent: string) {
+    const slotToOverride = ethers.keccak256(
+      ethers.concat([ethers.zeroPadValue(agent, 32), TenderlySimulator.AGENT_REGISTRY_MAPPING_SLOT]),
+    );
+
+    stateOverride[portikusAddress] ||= {};
+    stateOverride[portikusAddress].storage ||= {};
+    stateOverride[portikusAddress].storage[slotToOverride] = ethers.AbiCoder.defaultAbiCoder().encode(["bool"], [true]);
   }
 }

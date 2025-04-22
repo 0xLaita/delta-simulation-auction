@@ -125,11 +125,24 @@ export class AgentService {
 
       logger.info(`Returning a bid for the order with executed amount ${executedAmount}`);
 
+      const executorData: ExecutorData = {
+        executionCalldata: txParams.data,
+        feeRecipient: ZERO_ADDRESS,
+        srcToken: srcToken,
+        destToken: destToken,
+        feeAmount: "0", // purposely take no fee
+      };
+
+      const calldataToExecute = ethers.AbiCoder.defaultAbiCoder().encode(
+        ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
+        [executorData],
+      );
+
       return {
         orderId: order.orderId,
         executedAmount: executedAmount.toString(),
-        calldataToExecute: txParams.data,
-        executionAddress: txParams.to,
+        calldataToExecute,
+        executionAddress: AUGUSTUS_EXECUTOR_ADDRESS,
         fillPercent: 100,
         settlementType: SettlementType.Swap,
       };
@@ -169,6 +182,7 @@ export class AgentService {
       to: DELTA_ADDRESS,
       chainId,
       data,
+      gasLimit: 1_000_000,
     };
   }
 

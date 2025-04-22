@@ -1,11 +1,26 @@
 import { randomUUID } from "node:crypto";
-import type { DeltaAuctionWithSignature, DeltaBidRequest, DeltaBidResponse, ExecuteRequest } from "@/common/types";
+import DELTA_ABI from "@/common/abi/delta.abi.json";
+import {
+  type DeltaAuctionWithSignature,
+  type DeltaBidRequest,
+  type DeltaBidResponse,
+  type ExecuteRequest,
+  SettlementType,
+  type Solution,
+} from "@/common/types";
 import { env } from "@/common/utils/envConfig";
+import { httpAgent } from "@/lib/simulation-auction/httpAgent";
 import { orderGenerator } from "@/lib/simulation-auction/orderGenerator";
+import { type StateOverride, TenderlySimulator } from "@/lib/tenderly";
+import { Interface } from "ethers";
 import { pino } from "pino";
-import { httpAgent } from "./httpAgent";
 
 const logger = pino({ name: "Simulation Auction" });
+
+const deltaInterface = Interface.from(DELTA_ABI);
+const PORTIKUS_ADDRESS = "0x0007005729e310000c6003402d8a0fb700da0c00";
+const DELTA_ADDRESS = "0x0000000000bbf5c5fd284e657f01bd000933c96d";
+const AGENT_ADDRESS = env.AGENT_ADDRESS;
 
 const DELTA_GAS_OVERHEAD = 250_000;
 
@@ -52,6 +67,15 @@ export class SimulationAuction {
         logger.error("Received no solution for generated auction, terminating the flow...");
         return;
       }
+      logger.info(`Received solution for generated auction: ${JSON.stringify(solution)}`);
+      // simulate the solution
+      const simulation = await this.simulateBidSolution(deltaAuction, solution.solutions[0]);
+      logger.info(`Solution simulation - ${simulation.url}`);
+      if (!simulation.success) {
+        // terminate if no solution is invalid
+        logger.error("Solution simulation reverted, terminating the flow...");
+        return;
+      }
       // skipping the competition, let the agent execute the order
       const executeRequest = this.getExecuteRequest(deltaAuction, solution);
       const { success } = await httpAgent.execute(executeRequest);
@@ -75,6 +99,68 @@ export class SimulationAuction {
       order: order,
       signature,
     };
+  }
+
+  private async simulateBidSolution(auction: DeltaAuctionWithSignature, solution: Solution) {
+    const { order } = auction;
+    const simulator = TenderlySimulator.getInstance();
+
+    const stateOverride: StateOverride = {};
+    const amountToFund = BigInt(order.srcAmount) * 2n;
+
+    await simulator.addAllowanceOverride(
+      stateOverride,
+      auction.chainId,
+      order.srcToken,
+      order.owner,
+      DELTA_ADDRESS,
+      amountToFund,
+    );
+    await simulator.addTokenBalanceOverride(stateOverride, auction.chainId, order.srcToken, order.owner, amountToFund);
+    simulator.addAgentRegistryOverride(stateOverride, PORTIKUS_ADDRESS, AGENT_ADDRESS);
+
+    const data =
+      solution.settlementType === SettlementType.Swap
+        ? this.buildSwapSettlementCalldata(auction, solution)
+        : this.buildDirectSettlementCalldata(auction, solution);
+
+    const simulationRequest = {
+      chainId: auction.chainId,
+      from: AGENT_ADDRESS,
+      to: DELTA_ADDRESS,
+      data,
+      stateOverride,
+    };
+
+    const simulation = await simulator.simulateTransaction(simulationRequest);
+
+    return {
+      success: simulation.status,
+      url: simulator.getSimulationUrl(simulation),
+    };
+  }
+
+  buildSwapSettlementCalldata(order: DeltaAuctionWithSignature, solution: Solution) {
+    const orderWithSig = {
+      order: order.order,
+      signature: order.signature,
+    };
+
+    return deltaInterface.encodeFunctionData("swapSettle", [
+      orderWithSig,
+      solution.calldataToExecute,
+      solution.executionAddress,
+      "0x",
+    ]);
+  }
+
+  buildDirectSettlementCalldata(order: DeltaAuctionWithSignature, solution: Solution) {
+    const orderWithSig = {
+      order: order.order,
+      signature: order.signature,
+    };
+
+    return deltaInterface.encodeFunctionData("directSettle", [orderWithSig, solution.executedAmount, "0x"]);
   }
 
   private getBidRequest(auction: DeltaAuctionWithSignature): DeltaBidRequest {
@@ -101,7 +187,7 @@ export class SimulationAuction {
     const solution = bid.solutions.find((x) => x.orderId === auction.id);
 
     if (!solution) {
-      throw new Error("No solution found for order ${auction.id}");
+      throw new Error(`No solution found for order ${auction.id}`);
     }
 
     return {
