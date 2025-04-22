@@ -1,7 +1,7 @@
 import type { Call } from "@/api/rpc/rpcCallModel";
 import DELTA_ABI from "@/common/abi/delta.abi.json";
 import { env } from "@/common/utils/envConfig";
-import { Tenderly } from "@/lib/tenderly";
+import { TenderlySimulator } from "@/lib/tenderly";
 import { stateOverrideHelpers } from "@/lib/tenderly/stateOverrideHelpers";
 import axios from "axios";
 import { Interface, Transaction, ethers } from "ethers";
@@ -63,7 +63,7 @@ export class RpcService {
             },
           };
 
-          await Tenderly.getInstance().simulateTransaction(simulationRequest);
+          await TenderlySimulator.getInstance().simulateTransaction(simulationRequest);
 
           return {
             jsonrpc: call.jsonrpc,
@@ -114,12 +114,12 @@ export class RpcService {
               },
             },
           };
-          const result = await Tenderly.getInstance().estimateTransaction(simulationRequest);
+          const result = await TenderlySimulator.getInstance().simulateTransaction(simulationRequest);
 
           return {
             jsonrpc: call.jsonrpc,
             id: call.id,
-            result,
+            result: BigInt(result.gas_used).toString(16),
           };
         }
         default:
