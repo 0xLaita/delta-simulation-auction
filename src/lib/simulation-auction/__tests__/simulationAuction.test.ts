@@ -10,7 +10,7 @@ describe("SimulationAuction", () => {
 
   describe("generateAuction", () => {
     it("should generate auction", async () => {
-      const auction = await simulationAuction.generateAuction();
+      const auction = await simulationAuction.generateOrderWithSignature();
 
       // todo: assert
     });

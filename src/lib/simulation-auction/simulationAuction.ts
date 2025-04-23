@@ -1,11 +1,26 @@
 import { randomUUID } from "node:crypto";
-import type { DeltaAuctionWithSignature, DeltaBidRequest, DeltaBidResponse, ExecuteRequest } from "@/common/types";
+import DELTA_ABI from "@/common/abi/delta.abi.json";
+import {
+  type DeltaBidRequest,
+  type DeltaBidResponse,
+  type DeltaOrderWithSignature,
+  type ExecuteRequest,
+  SettlementType,
+  type Solution,
+} from "@/common/types";
 import { env } from "@/common/utils/envConfig";
+import { httpAgent } from "@/lib/simulation-auction/httpAgent";
 import { orderGenerator } from "@/lib/simulation-auction/orderGenerator";
+import { type StateOverride, TenderlySimulator } from "@/lib/tenderly";
+import { Interface } from "ethers";
 import { pino } from "pino";
-import { httpAgent } from "./httpAgent";
 
 const logger = pino({ name: "Simulation Auction" });
+
+const deltaInterface = Interface.from(DELTA_ABI);
+const PORTIKUS_ADDRESS = "0x0007005729e310000c6003402d8a0fb700da0c00";
+const DELTA_ADDRESS = "0x0000000000bbf5c5fd284e657f01bd000933c96d";
+const AGENT_ADDRESS = env.AGENT_ADDRESS;
 
 const DELTA_GAS_OVERHEAD = 250_000;
 
@@ -41,19 +56,28 @@ export class SimulationAuction {
 
   async simulateAuctionFlow() {
     try {
-      // generate auction
-      const deltaAuction = await this.generateAuction();
+      // generate a signed order with id
+      const deltaOrderWithSignature = await this.generateOrderWithSignature();
       logger.info("Generated Delta Auction with trade");
       // query the agent for a bid
-      const request = this.getBidRequest(deltaAuction);
+      const request = this.getBidRequest(deltaOrderWithSignature);
       const solution = await httpAgent.bid(request);
       if (!solution) {
         // terminate if no solution was found
         logger.error("Received no solution for generated auction, terminating the flow...");
         return;
       }
+      logger.info(`Received solution for generated auction: ${JSON.stringify(solution)}`);
+      // simulate the solution
+      const simulation = await this.simulateBidSolution(deltaOrderWithSignature, solution.solutions[0]);
+      logger.info(`Solution simulation - ${simulation.url}`);
+      if (!simulation.success) {
+        // terminate if solution is invalid
+        logger.error("Solution simulation reverted, terminating the flow...");
+        return;
+      }
       // skipping the competition, let the agent execute the order
-      const executeRequest = this.getExecuteRequest(deltaAuction, solution);
+      const executeRequest = this.getExecuteRequest(deltaOrderWithSignature, solution);
       const { success } = await httpAgent.execute(executeRequest);
       if (success) {
         logger.info("Successfully notified the agent to execute the order");
@@ -65,10 +89,9 @@ export class SimulationAuction {
     }
   }
 
-  async generateAuction(): Promise<DeltaAuctionWithSignature> {
-    // generate signed order
+  async generateOrderWithSignature(): Promise<DeltaOrderWithSignature> {
     const { order, signature } = await orderGenerator.generateSignedOrder(this.chainId);
-    // return the generated auction
+
     return {
       id: randomUUID(),
       chainId: this.chainId,
@@ -77,17 +100,85 @@ export class SimulationAuction {
     };
   }
 
-  private getBidRequest(auction: DeltaAuctionWithSignature): DeltaBidRequest {
+  private async simulateBidSolution(orderWithSignature: DeltaOrderWithSignature, solution: Solution) {
+    const { order } = orderWithSignature;
+    const simulator = TenderlySimulator.getInstance();
+
+    const stateOverride: StateOverride = {};
+    const amountToFund = BigInt(order.srcAmount) * 2n;
+
+    await simulator.addAllowanceOverride(
+      stateOverride,
+      orderWithSignature.chainId,
+      order.srcToken,
+      order.owner,
+      DELTA_ADDRESS,
+      amountToFund,
+    );
+    await simulator.addTokenBalanceOverride(
+      stateOverride,
+      orderWithSignature.chainId,
+      order.srcToken,
+      order.owner,
+      amountToFund,
+    );
+    simulator.addAgentRegistryOverride(stateOverride, PORTIKUS_ADDRESS, AGENT_ADDRESS);
+
+    const data =
+      solution.settlementType === SettlementType.Swap
+        ? this.buildSwapSettlementCalldata(orderWithSignature, solution)
+        : this.buildDirectSettlementCalldata(orderWithSignature, solution);
+
+    const simulationRequest = {
+      chainId: orderWithSignature.chainId,
+      from: AGENT_ADDRESS,
+      to: DELTA_ADDRESS,
+      data,
+      stateOverride,
+    };
+
+    const simulation = await simulator.simulateTransaction(simulationRequest);
+
     return {
-      chainId: auction.chainId,
+      success: simulation.status,
+      url: simulator.getSimulationUrl(simulation),
+    };
+  }
+
+  buildSwapSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
+    const orderWithSig = {
+      order: order.order,
+      signature: order.signature,
+    };
+
+    return deltaInterface.encodeFunctionData("swapSettle", [
+      orderWithSig,
+      solution.calldataToExecute,
+      solution.executionAddress,
+      "0x",
+    ]);
+  }
+
+  buildDirectSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
+    const orderWithSig = {
+      order: order.order,
+      signature: order.signature,
+    };
+
+    return deltaInterface.encodeFunctionData("directSettle", [orderWithSig, solution.executedAmount, "0x"]);
+  }
+
+  private getBidRequest(orderWithSignature: DeltaOrderWithSignature): DeltaBidRequest {
+    return {
+      chainId: orderWithSignature.chainId,
       orders: [
         {
-          orderId: auction.id,
-          srcToken: auction.order.srcToken,
-          destToken: auction.order.destToken,
+          orderId: orderWithSignature.id,
+          srcToken: orderWithSignature.order.srcToken,
+          destToken: orderWithSignature.order.destToken,
           side: "SELL",
-          srcAmount: auction.order.srcAmount,
-          destAmount: auction.order.destAmount,
+          srcAmount: orderWithSignature.order.srcAmount,
+          destAmount: orderWithSignature.order.destAmount,
           partiallyFillable: false,
           metadata: {
             deltaGasOverhead: DELTA_GAS_OVERHEAD,
@@ -97,11 +188,11 @@ export class SimulationAuction {
     };
   }
 
-  private getExecuteRequest(auction: DeltaAuctionWithSignature, bid: DeltaBidResponse): ExecuteRequest {
-    const solution = bid.solutions.find((x) => x.orderId === auction.id);
+  private getExecuteRequest(orderWithSignature: DeltaOrderWithSignature, bid: DeltaBidResponse): ExecuteRequest {
+    const solution = bid.solutions.find((x) => x.orderId === orderWithSignature.id);
 
     if (!solution) {
-      throw new Error("No solution found for order ${auction.id}");
+      throw new Error(`No solution found for order ${orderWithSignature.id}`);
     }
 
     return {
@@ -109,8 +200,8 @@ export class SimulationAuction {
       orders: [
         {
           orderId: solution.orderId,
-          orderData: { ...auction.order, expectedAmount: auction.order.expectedDestAmount },
-          signature: auction.signature,
+          orderData: { ...orderWithSignature.order, expectedAmount: orderWithSignature.order.expectedDestAmount },
+          signature: orderWithSignature.signature,
           side: "SELL",
           partiallyFillable: false,
           solution: solution,

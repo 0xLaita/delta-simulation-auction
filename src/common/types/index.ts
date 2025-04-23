@@ -1,10 +1,5 @@
 export type SwapSide = "BUY" | "SELL";
 
-export interface StateConfig {
-  balanceSlot: string;
-  allowanceSlot: string;
-}
-
 export interface AmountsConfig {
   min: string;
   max: string;
@@ -15,7 +10,6 @@ export interface TokenConfig {
   address: string;
   decimals: number;
   amounts: AmountsConfig;
-  state: StateConfig;
 }
 
 export type ChainTokensConfig = Record<number, Record<string, TokenConfig>>;
@@ -95,7 +89,7 @@ export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
   expectedAmount: string;
 };
 
-export interface DeltaAuctionWithSignature {
+export interface DeltaOrderWithSignature {
   id: string;
   chainId: number;
   order: DeltaOrder;

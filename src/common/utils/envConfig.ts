@@ -12,6 +12,7 @@ export const env = cleanEnv(process.env, {
   COMMON_RATE_LIMIT_WINDOW_MS: num({ devDefault: testOnly(1000) }),
   CHAIN_ID: num(),
   AGENT_NAME: str(),
+  AGENT_ADDRESS: str(),
   AGENT_URL: url(),
   AUCTION_GENERATION_INTERVAL_MS: num({ default: 10_000 }),
   RPC_URL: str(),
