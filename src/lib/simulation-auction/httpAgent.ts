@@ -1,8 +1,8 @@
 import type {
-  DeltaAuctionWithSignature,
   DeltaBidRequest,
   DeltaBidResponse,
   DeltaOrder,
+  DeltaOrderWithSignature,
   ExecuteRequest,
   Solution,
 } from "@/common/types";

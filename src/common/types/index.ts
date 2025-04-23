@@ -89,7 +89,7 @@ export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
   expectedAmount: string;
 };
 
-export interface DeltaAuctionWithSignature {
+export interface DeltaOrderWithSignature {
   id: string;
   chainId: number;
   order: DeltaOrder;

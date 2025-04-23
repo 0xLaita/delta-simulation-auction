@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import DELTA_ABI from "@/common/abi/delta.abi.json";
 import {
-  type DeltaAuctionWithSignature,
   type DeltaBidRequest,
   type DeltaBidResponse,
+  type DeltaOrderWithSignature,
   type ExecuteRequest,
   SettlementType,
   type Solution,
@@ -57,10 +57,10 @@ export class SimulationAuction {
   async simulateAuctionFlow() {
     try {
       // generate auction
-      const deltaAuction = await this.generateAuction();
+      const deltaOrderWithSignature = await this.generateOrderWithSignature();
       logger.info("Generated Delta Auction with trade");
       // query the agent for a bid
-      const request = this.getBidRequest(deltaAuction);
+      const request = this.getBidRequest(deltaOrderWithSignature);
       const solution = await httpAgent.bid(request);
       if (!solution) {
         // terminate if no solution was found
@@ -69,15 +69,15 @@ export class SimulationAuction {
       }
       logger.info(`Received solution for generated auction: ${JSON.stringify(solution)}`);
       // simulate the solution
-      const simulation = await this.simulateBidSolution(deltaAuction, solution.solutions[0]);
+      const simulation = await this.simulateBidSolution(deltaOrderWithSignature, solution.solutions[0]);
       logger.info(`Solution simulation - ${simulation.url}`);
       if (!simulation.success) {
-        // terminate if no solution is invalid
+        // terminate if solution is invalid
         logger.error("Solution simulation reverted, terminating the flow...");
         return;
       }
       // skipping the competition, let the agent execute the order
-      const executeRequest = this.getExecuteRequest(deltaAuction, solution);
+      const executeRequest = this.getExecuteRequest(deltaOrderWithSignature, solution);
       const { success } = await httpAgent.execute(executeRequest);
       if (success) {
         logger.info("Successfully notified the agent to execute the order");
@@ -89,7 +89,7 @@ export class SimulationAuction {
     }
   }
 
-  async generateAuction(): Promise<DeltaAuctionWithSignature> {
+  async generateOrderWithSignature(): Promise<DeltaOrderWithSignature> {
     // generate signed order
     const { order, signature } = await orderGenerator.generateSignedOrder(this.chainId);
     // return the generated auction
@@ -101,7 +101,7 @@ export class SimulationAuction {
     };
   }
 
-  private async simulateBidSolution(auction: DeltaAuctionWithSignature, solution: Solution) {
+  private async simulateBidSolution(auction: DeltaOrderWithSignature, solution: Solution) {
     const { order } = auction;
     const simulator = TenderlySimulator.getInstance();
 
@@ -140,7 +140,7 @@ export class SimulationAuction {
     };
   }
 
-  buildSwapSettlementCalldata(order: DeltaAuctionWithSignature, solution: Solution) {
+  buildSwapSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
     const orderWithSig = {
       order: order.order,
       signature: order.signature,
@@ -154,7 +154,7 @@ export class SimulationAuction {
     ]);
   }
 
-  buildDirectSettlementCalldata(order: DeltaAuctionWithSignature, solution: Solution) {
+  buildDirectSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
     const orderWithSig = {
       order: order.order,
       signature: order.signature,
@@ -163,7 +163,7 @@ export class SimulationAuction {
     return deltaInterface.encodeFunctionData("directSettle", [orderWithSig, solution.executedAmount, "0x"]);
   }
 
-  private getBidRequest(auction: DeltaAuctionWithSignature): DeltaBidRequest {
+  private getBidRequest(auction: DeltaOrderWithSignature): DeltaBidRequest {
     return {
       chainId: auction.chainId,
       orders: [
@@ -183,7 +183,7 @@ export class SimulationAuction {
     };
   }
 
-  private getExecuteRequest(auction: DeltaAuctionWithSignature, bid: DeltaBidResponse): ExecuteRequest {
+  private getExecuteRequest(auction: DeltaOrderWithSignature, bid: DeltaBidResponse): ExecuteRequest {
     const solution = bid.solutions.find((x) => x.orderId === auction.id);
 
     if (!solution) {
