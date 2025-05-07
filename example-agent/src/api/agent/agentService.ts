@@ -5,6 +5,7 @@ import {
   type DeltaBidRequest,
   type DeltaBidResponse,
   type DeltaExecuteOrder,
+  DeltaOrder,
   type ExecuteRequest,
   type QuoteRequest,
   type QuoteResponse,
@@ -53,7 +54,9 @@ export class AgentService {
       try {
         logger.info(`Executing the auction ${order.orderId}`);
         const transaction = await this.buildSettlementTransaction(request.chainId, order);
-        const provider = new JsonRpcProvider(env.RPC_URL, request.chainId, { batchMaxSize: 1 });
+        const provider = new JsonRpcProvider(env.RPC_URL, request.chainId, {
+          batchMaxSize: 1,
+        });
         const { gasPrice, maxPriorityFeePerGas, maxFeePerGas } = await provider.getFeeData();
         const feeData = maxPriorityFeePerGas && maxFeePerGas ? { maxPriorityFeePerGas, maxFeePerGas } : { gasPrice };
         const response = await this.wallet.connect(provider).sendTransaction({
@@ -152,27 +155,29 @@ export class AgentService {
     }
   }
   private async buildSettlementTransaction(chainId: number, order: DeltaExecuteOrder): Promise<TransactionRequest> {
-    const { calldataToExecute: executionCalldata } = order.solution;
     const { orderData, signature } = order;
 
-    const executorData: ExecutorData = {
-      executionCalldata,
-      feeRecipient: ZERO_ADDRESS,
-      srcToken: orderData.srcToken,
-      destToken: orderData.destToken,
-      feeAmount: "1", // purposely take no fee
+    const orderWithSig = {
+      order: {
+        owner: orderData.owner,
+        beneficiary: orderData.beneficiary,
+        srcToken: orderData.srcToken,
+        destToken: orderData.destToken,
+        srcAmount: orderData.srcAmount,
+        destAmount: orderData.destAmount,
+        expectedDestAmount: orderData.expectedAmount,
+        nonce: orderData.nonce,
+        deadline: orderData.deadline,
+        permit: orderData.permit,
+        partnerAndFee: orderData.partnerAndFee,
+        bridge: orderData.bridge,
+      },
+      signature,
     };
-
-    const orderWithSig = { order: order.orderData, signature };
-
-    const executorDataEncoded = ethers.AbiCoder.defaultAbiCoder().encode(
-      ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
-      [executorData],
-    );
 
     const data = deltaInterface.encodeFunctionData("swapSettle", [
       orderWithSig,
-      executorDataEncoded,
+      order.solution.calldataToExecute,
       AUGUSTUS_EXECUTOR_ADDRESS,
       order.bridgeDataEncoded,
     ]);

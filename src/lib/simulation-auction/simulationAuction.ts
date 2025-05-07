@@ -200,7 +200,20 @@ export class SimulationAuction {
       orders: [
         {
           orderId: solution.orderId,
-          orderData: { ...orderWithSignature.order, expectedAmount: orderWithSignature.order.expectedDestAmount },
+          orderData: {
+            owner: orderWithSignature.order.owner,
+            beneficiary: orderWithSignature.order.beneficiary,
+            srcToken: orderWithSignature.order.srcToken,
+            destToken: orderWithSignature.order.destToken,
+            srcAmount: orderWithSignature.order.srcAmount,
+            destAmount: orderWithSignature.order.destAmount,
+            expectedAmount: orderWithSignature.order.expectedDestAmount,
+            nonce: orderWithSignature.order.nonce,
+            deadline: orderWithSignature.order.deadline,
+            permit: orderWithSignature.order.permit,
+            partnerAndFee: orderWithSignature.order.partnerAndFee,
+            bridge: orderWithSignature.order.bridge,
+          },
           signature: orderWithSignature.signature,
           side: "SELL",
           partiallyFillable: false,
