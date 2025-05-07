@@ -62,7 +62,7 @@ const main = async () => {
           side: "SELL",
           partiallyFillable: false,
           metadata: {
-            deltaGasOverhead: null,
+            deltaGasOverhead: 250_000,
           },
         },
       ],
@@ -74,6 +74,13 @@ const main = async () => {
     } else {
       console.log("Received bid:\n");
       console.log(bidResponse);
+    }
+    // validate order id
+    if (bidResponse.solutions[0].orderId.toLowerCase() !== orderId.toLowerCase()) {
+      console.log(
+        `Order ids are not matching. Solution order id: ${bidResponse.solutions[0].orderId}, actual order id: ${orderId}`,
+      );
+      return;
     }
     // send execute request, skipping the auction
     const { success } = await agent.execute({
