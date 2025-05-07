@@ -68,7 +68,7 @@ const main = async () => {
       ],
     });
     // return if no bid returned
-    if (!bidResponse) {
+    if (!bidResponse || !bidResponse.solutions || bidResponse.solutions.length === 0) {
       console.log("No bid was returned from the agent");
       return;
     } else {
