@@ -5,7 +5,6 @@ import {
   type DeltaBidRequest,
   type DeltaBidResponse,
   type DeltaExecuteOrder,
-  DeltaOrder,
   type ExecuteRequest,
   type QuoteRequest,
   type QuoteResponse,
