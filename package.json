@@ -16,7 +16,8 @@
     "lint:fix": "biome check src/ --fix",
     "format": "biome format src/",
     "test": "vitest run",
-    "prepare": "husky"
+    "prepare": "husky",
+    "on-chain-auction": "tsx scripts/on-chain-auction-flow.ts"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^7.0.0",
@@ -46,7 +47,7 @@
     "rimraf": "^6.0.0",
     "supertest": "^7.0.0",
     "tsup": "^8.0.2",
-    "tsx": "^4.7.2",
+    "tsx": "^4.19.4",
     "typescript": "^5.4.4",
     "vite-tsconfig-paths": "^5.0.0",
     "vitest": "^2.0.0"

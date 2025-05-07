@@ -29,7 +29,7 @@ interface DeltaBuildOrderParams {
   partnerTakesSurplus?: boolean;
   slippage?: number;
   partiallyFillable?: boolean;
-  bridge: DeltaBridge;
+  bridge?: DeltaBridge;
 }
 
 interface DeltaPrices {
