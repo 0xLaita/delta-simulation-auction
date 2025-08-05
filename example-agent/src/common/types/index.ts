@@ -56,10 +56,12 @@ export interface DeltaOrder {
   destToken: string;
   srcAmount: string;
   destAmount: string;
-  expectedDestAmount: string;
+  expectedAmount: string;
   deadline: number;
+  kind: number;
   nonce: string;
   partnerAndFee: string;
+  metadata: string;
   permit: string;
   bridge: DeltaBridge;
 }

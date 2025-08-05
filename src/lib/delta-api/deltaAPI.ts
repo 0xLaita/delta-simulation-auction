@@ -1,4 +1,4 @@
-import type { DeltaBridge, DeltaOrder } from "@/common/types";
+import type { DeltaBridge, DeltaOrder, SwapSide } from "@/common/types";
 import axios from "axios";
 import type { TypedDataDomain, TypedDataField } from "ethers";
 
@@ -11,7 +11,7 @@ interface DeltaPricingParams {
   amount: string;
   srcDecimals: number;
   destDecimals: number;
-  side: "SELL" | "BUY";
+  side: SwapSide;
   userAddress?: string;
   partner?: string;
 }
@@ -29,6 +29,8 @@ interface DeltaBuildOrderParams {
   partnerTakesSurplus?: boolean;
   slippage?: number;
   partiallyFillable?: boolean;
+  side?: SwapSide;
+  metadata?: string;
   bridge?: DeltaBridge;
 }
 

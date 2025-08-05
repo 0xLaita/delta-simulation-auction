@@ -83,7 +83,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -92,6 +92,11 @@
                 "type": "uint256",
                 "internalType": "uint256"
               },
+              {
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
               { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
@@ -99,6 +104,7 @@
                 "internalType": "uint256"
               },
               { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
               {
                 "name": "bridge",
                 "type": "tuple",
@@ -156,11 +162,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -187,7 +189,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -197,16 +199,234 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
               { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      {
+        "name": "executorData",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      },
+      { "name": "executor", "type": "address", "internalType": "address" },
+      {
+        "name": "bridgeData",
+        "type": "bytes[]",
+        "internalType": "bytes[]"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buySettle",
+    "inputs": [
+      {
+        "name": "orderWithSig",
+        "type": "tuple",
+        "internalType": "struct OrderWithSig",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              { "name": "owner", "type": "address", "internalType": "address" },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
+            ]
+          },
+          { "name": "signature", "type": "bytes", "internalType": "bytes" }
+        ]
+      },
+      { "name": "executorData", "type": "bytes", "internalType": "bytes" },
+      { "name": "executor", "type": "address", "internalType": "address" },
+      {
+        "name": "bridgeData",
+        "type": "bytes",
+        "internalType": "bytes"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "buySettleBatch",
+    "inputs": [
+      {
+        "name": "ordersWithSigs",
+        "type": "tuple[]",
+        "internalType": "struct OrderWithSig[]",
+        "components": [
+          {
+            "name": "order",
+            "type": "tuple",
+            "internalType": "struct Order",
+            "components": [
+              { "name": "owner", "type": "address", "internalType": "address" },
+              {
+                "name": "beneficiary",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "destToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "srcAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "expectedAmount",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "deadline",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
+              },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
+              {
+                "name": "partnerAndFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
               {
                 "name": "bridge",
                 "type": "tuple",
@@ -268,11 +488,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -299,7 +515,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -309,16 +525,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -343,11 +588,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -374,7 +615,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -384,16 +625,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -418,11 +688,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -449,7 +715,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -459,16 +725,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -495,11 +790,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -526,7 +817,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -536,16 +827,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -602,7 +922,7 @@
             "internalType": "uint256"
           },
           {
-            "name": "expectedDestAmount",
+            "name": "expectedAmount",
             "type": "uint256",
             "internalType": "uint256"
           },
@@ -611,13 +931,46 @@
             "type": "uint256",
             "internalType": "uint256"
           },
+          {
+            "name": "kind",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
           { "name": "nonce", "type": "uint256", "internalType": "uint256" },
           {
             "name": "partnerAndFee",
             "type": "uint256",
             "internalType": "uint256"
           },
-          { "name": "permit", "type": "bytes", "internalType": "bytes" }
+          { "name": "permit", "type": "bytes", "internalType": "bytes" },
+          { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+          {
+            "name": "bridge",
+            "type": "tuple",
+            "internalType": "struct Bridge",
+            "components": [
+              {
+                "name": "maxRelayerFee",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "destinationChainId",
+                "type": "uint256",
+                "internalType": "uint256"
+              },
+              {
+                "name": "outputToken",
+                "type": "address",
+                "internalType": "address"
+              },
+              {
+                "name": "multiCallHandler",
+                "type": "address",
+                "internalType": "address"
+              }
+            ]
+          }
         ]
       }
     ],
@@ -644,11 +997,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -675,7 +1024,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -685,16 +1034,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }
@@ -720,11 +1098,7 @@
             "type": "tuple",
             "internalType": "struct Order",
             "components": [
-              {
-                "name": "owner",
-                "type": "address",
-                "internalType": "address"
-              },
+              { "name": "owner", "type": "address", "internalType": "address" },
               {
                 "name": "beneficiary",
                 "type": "address",
@@ -751,7 +1125,7 @@
                 "internalType": "uint256"
               },
               {
-                "name": "expectedDestAmount",
+                "name": "expectedAmount",
                 "type": "uint256",
                 "internalType": "uint256"
               },
@@ -761,16 +1135,45 @@
                 "internalType": "uint256"
               },
               {
-                "name": "nonce",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "kind",
+                "type": "uint8",
+                "internalType": "uint8"
               },
+              { "name": "nonce", "type": "uint256", "internalType": "uint256" },
               {
                 "name": "partnerAndFee",
                 "type": "uint256",
                 "internalType": "uint256"
               },
-              { "name": "permit", "type": "bytes", "internalType": "bytes" }
+              { "name": "permit", "type": "bytes", "internalType": "bytes" },
+              { "name": "metadata", "type": "bytes", "internalType": "bytes" },
+              {
+                "name": "bridge",
+                "type": "tuple",
+                "internalType": "struct Bridge",
+                "components": [
+                  {
+                    "name": "maxRelayerFee",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "destinationChainId",
+                    "type": "uint256",
+                    "internalType": "uint256"
+                  },
+                  {
+                    "name": "outputToken",
+                    "type": "address",
+                    "internalType": "address"
+                  },
+                  {
+                    "name": "multiCallHandler",
+                    "type": "address",
+                    "internalType": "address"
+                  }
+                ]
+              }
             ]
           },
           { "name": "signature", "type": "bytes", "internalType": "bytes" }

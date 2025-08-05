@@ -1,5 +1,10 @@
 export type SwapSide = "BUY" | "SELL";
 
+export enum OrderKind {
+  Sell = 0,
+  Buy = 1,
+}
+
 export interface AmountsConfig {
   min: string;
   max: string;
@@ -54,7 +59,7 @@ export interface ExecuteRequest {
 
 export interface DeltaExecuteOrder {
   orderId: string;
-  orderData: OnChainDeltaOrderData;
+  orderData: DeltaOrder;
   signature: string;
   side: SwapSide;
   partiallyFillable: boolean;
@@ -76,18 +81,15 @@ export interface DeltaOrder {
   destToken: string;
   srcAmount: string;
   destAmount: string;
-  expectedDestAmount: string;
+  expectedAmount: string;
   deadline: number;
+  kind: OrderKind;
   nonce: string;
   partnerAndFee: string;
   permit: string;
+  metadata: string;
   bridge: DeltaBridge;
 }
-
-// todo: remove this and use `Order` type after BUY release
-export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
-  expectedAmount: string;
-};
 
 export interface DeltaOrderWithSignature {
   id: string;
