@@ -44,18 +44,22 @@ const AUGUSTUS_EXECUTOR_ADDRESS = "0x6bb000067005450704003100632eb93ea00c0000";
 const AUGUSTUS_BUY_EXECUTOR_ADDRESS = "0xAEF1fb85eD2D8920527c6883F318493EEB359B46";
 const NATIVE_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 const DELTA_GAS_OVERHEAD = 250_000n;
+const DELTA_BASE_URL = "https://api.paraswap.io/delta";
+const LIMIT_ORDERS_API_KEY = process.env.LIMIT_ORDERS_API_KEY;
+const AGENT_NAME = process.env.AGENT_NAME ?? "example-agent";
 
 export class AgentService {
   private sdks: Record<number, SimpleFetchSDK> = {};
-  private wallet = Wallet.createRandom();
+  private readonly wallet = Wallet.createRandom();
 
   public async bid(request: DeltaBidRequest): Promise<DeltaBidResponse> {
     const { chainId, orders } = request;
-    const solutions = await Promise.all(orders.map((order) => this.bidSingle(chainId, order)));
+    const limitOrders = await this.fetchLimitOrders(chainId);
+    const solutions = await Promise.all([...orders, ...limitOrders].map((order) => this.bidSingle(chainId, order)));
 
     return {
       chainId,
-      solutions: solutions.filter((solution) => solution !== null) as Solution[],
+      solutions: solutions.filter((solution) => solution !== null),
     };
   }
 
@@ -231,6 +235,7 @@ export class AgentService {
     return {
       from: this.wallet.address,
       to: DELTA_ADDRESS,
+      value: order.value,
       chainId,
       data,
       gasLimit: 1_000_000,
@@ -258,6 +263,28 @@ export class AgentService {
     } catch (e) {
       logger.error(`Error getting fee amount in token ${tokenAddress}`, e);
       throw e;
+    }
+  }
+
+  private async fetchLimitOrders(chainId: number): Promise<DeltaBidOrder[]> {
+    if (!LIMIT_ORDERS_API_KEY) {
+      logger.warn("No limit orders API key provided, skipping fetching limit orders");
+
+      return [];
+    }
+
+    try {
+      return await axios
+        .get<DeltaBidOrder[]>(`${DELTA_BASE_URL}/orders/orderbook/${chainId}/${AGENT_NAME}`, {
+          headers: {
+            "x-api-key": LIMIT_ORDERS_API_KEY,
+          },
+        })
+        .then((x) => x.data);
+    } catch (e) {
+      logger.error(`Failed to fetch limit orders for chain ${chainId}`, e);
+
+      return [];
     }
   }
 }

@@ -111,9 +111,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -126,9 +126,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -217,9 +222,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -232,9 +237,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -327,9 +337,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -342,9 +352,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -433,9 +448,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -448,9 +463,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -543,9 +563,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -558,9 +578,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -643,9 +668,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -658,9 +683,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -743,9 +773,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -758,9 +788,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -845,9 +880,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -860,9 +895,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -950,9 +990,9 @@
             "internalType": "struct Bridge",
             "components": [
               {
-                "name": "maxRelayerFee",
-                "type": "uint256",
-                "internalType": "uint256"
+                "name": "protocolSelector",
+                "type": "bytes4",
+                "internalType": "bytes4"
               },
               {
                 "name": "destinationChainId",
@@ -965,9 +1005,14 @@
                 "internalType": "address"
               },
               {
-                "name": "multiCallHandler",
-                "type": "address",
-                "internalType": "address"
+                "name": "scalingFactor",
+                "type": "int8",
+                "internalType": "int8"
+              },
+              {
+                "name": "protocolData",
+                "type": "bytes",
+                "internalType": "bytes"
               }
             ]
           }
@@ -1052,9 +1097,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -1067,9 +1112,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }
@@ -1153,9 +1203,9 @@
                 "internalType": "struct Bridge",
                 "components": [
                   {
-                    "name": "maxRelayerFee",
-                    "type": "uint256",
-                    "internalType": "uint256"
+                    "name": "protocolSelector",
+                    "type": "bytes4",
+                    "internalType": "bytes4"
                   },
                   {
                     "name": "destinationChainId",
@@ -1168,9 +1218,14 @@
                     "internalType": "address"
                   },
                   {
-                    "name": "multiCallHandler",
-                    "type": "address",
-                    "internalType": "address"
+                    "name": "scalingFactor",
+                    "type": "int8",
+                    "internalType": "int8"
+                  },
+                  {
+                    "name": "protocolData",
+                    "type": "bytes",
+                    "internalType": "bytes"
                   }
                 ]
               }

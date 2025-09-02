@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { ethers } from "ethers";
-import type { DeltaOrder, SwapSide } from "../src/common/types";
+import { type DeltaOrder, OrderType, type SwapSide } from "../src/common/types";
 import { env } from "../src/common/utils/envConfig";
 import { deltaAPI } from "../src/lib/delta-api/deltaAPI";
 import { HttpAgent } from "../src/lib/simulation-auction/httpAgent";
+
 const USER_PK = env.USER_PK;
 
 if (!USER_PK) {
@@ -66,6 +67,7 @@ const main = async () => {
           destAmount: order.destAmount,
           side,
           partiallyFillable: false,
+          type: OrderType.Market,
           metadata: {
             deltaGasOverhead: 250_000,
           },
@@ -111,6 +113,7 @@ const main = async () => {
           },
           signature,
           side,
+          value: "0",
           partiallyFillable: false,
           bridgeDataEncoded: "0x",
           solution: bidResponse.solutions[0],

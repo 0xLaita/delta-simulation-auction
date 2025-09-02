@@ -5,6 +5,11 @@ export enum OrderKind {
   Buy = 1,
 }
 
+export enum OrderType {
+  Market = "Market",
+  Limit = "Limit",
+}
+
 export interface AmountsConfig {
   min: string;
   max: string;
@@ -46,6 +51,7 @@ export interface DeltaBidOrder {
   destAmount: string;
   partiallyFillable: boolean;
   metadata: DeltaBidOrderMetadata;
+  type: OrderType;
 }
 
 export interface DeltaBidResponse {
@@ -65,13 +71,15 @@ export interface DeltaExecuteOrder {
   partiallyFillable: boolean;
   solution: Solution;
   bridgeDataEncoded: string;
+  value: string;
 }
 
 export interface DeltaBridge {
-  maxRelayerFee: string;
+  protocolSelector: string;
   destinationChainId: number;
   outputToken: string;
-  multiCallHandler: string;
+  scalingFactor: number;
+  protocolData: string;
 }
 
 export interface DeltaOrder {

@@ -40,10 +40,11 @@ class OrderGenerator {
       owner: userAccount.address,
       chainId,
       bridge: {
-        maxRelayerFee: "0",
+        protocolSelector: "0x00000000",
         destinationChainId: 0,
         outputToken: ZERO_ADDRESS,
-        multiCallHandler: ZERO_ADDRESS,
+        scalingFactor: 0,
+        protocolData: "0x",
       },
     });
     // sign the order
