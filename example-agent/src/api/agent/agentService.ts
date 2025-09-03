@@ -12,14 +12,14 @@ import {
   type Solution,
 } from "@/common/types";
 import { env } from "@/common/utils/envConfig";
-import { type SimpleFetchSDK, SwapSide, constructSimpleSDK } from "@paraswap/sdk";
+import { type SimpleFetchSDK, SwapSide, type TransactionParams, constructSimpleSDK } from "@paraswap/sdk";
 import axios from "axios";
 import { Interface, JsonRpcProvider, type TransactionRequest, Wallet, ethers } from "ethers";
 import { pino } from "pino";
 
 const logger = pino({ name: "Agent" });
 
-interface ExecutorData {
+interface SellExecutorData {
   executionCalldata: string;
   feeRecipient: string;
   srcToken: string;
@@ -27,24 +27,39 @@ interface ExecutorData {
   feeAmount: string;
 }
 
+interface BuyExecutorData {
+  executorCalldata: string;
+  feeRecipient: string;
+  srcToken: string;
+  destToken: string;
+  quotedAmount: string;
+  destAmount: string;
+  approveSrc: boolean;
+}
+
 const deltaInterface = Interface.from(DELTA_ABI);
 
 const DEFAULT_SLIPPAGE = 500;
 const AUGUSTUS_EXECUTOR_ADDRESS = "0x6bb000067005450704003100632eb93ea00c0000";
+const AUGUSTUS_BUY_EXECUTOR_ADDRESS = "0xAEF1fb85eD2D8920527c6883F318493EEB359B46";
 const NATIVE_TOKEN_ADDRESS = "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
 const DELTA_GAS_OVERHEAD = 250_000n;
+const DELTA_BASE_URL = "https://api.paraswap.io/delta";
+const LIMIT_ORDERS_API_KEY = process.env.LIMIT_ORDERS_API_KEY;
+const AGENT_NAME = process.env.AGENT_NAME ?? "example-agent";
 
 export class AgentService {
   private sdks: Record<number, SimpleFetchSDK> = {};
-  private wallet = Wallet.createRandom();
+  private readonly wallet = Wallet.createRandom();
 
   public async bid(request: DeltaBidRequest): Promise<DeltaBidResponse> {
     const { chainId, orders } = request;
-    const solutions = await Promise.all(orders.map((order) => this.bidSingle(chainId, order)));
+    const limitOrders = await this.fetchLimitOrders(chainId);
+    const solutions = await Promise.all([...orders, ...limitOrders].map((order) => this.bidSingle(chainId, order)));
 
     return {
       chainId,
-      solutions: solutions.filter((solution) => solution !== null) as Solution[],
+      solutions: solutions.filter((solution) => solution !== null),
     };
   }
 
@@ -127,24 +142,15 @@ export class AgentService {
 
       logger.info(`Returning a bid for the order with executed amount ${executedAmount}`);
 
-      const executorData: ExecutorData = {
-        executionCalldata: txParams.data,
-        feeRecipient: ZERO_ADDRESS,
-        srcToken: srcToken,
-        destToken: destToken,
-        feeAmount: "0", // purposely take no fee
-      };
+      const calldataToExecute = this.getCalldataToExecute(order, txParams, srcToken, destToken, executedAmount, amount);
 
-      const calldataToExecute = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
-        [executorData],
-      );
+      const executionAddress = order.side === SwapSide.BUY ? AUGUSTUS_BUY_EXECUTOR_ADDRESS : AUGUSTUS_EXECUTOR_ADDRESS;
 
       return {
         orderId: order.orderId,
         executedAmount: executedAmount.toString(),
         calldataToExecute,
-        executionAddress: AUGUSTUS_EXECUTOR_ADDRESS,
+        executionAddress,
         fillPercent: 100,
         settlementType: SettlementType.Swap,
       };
@@ -153,6 +159,48 @@ export class AgentService {
       return null;
     }
   }
+
+  private getCalldataToExecute(
+    order: DeltaBidOrder,
+    txParams: TransactionParams,
+    srcToken: string,
+    destToken: string,
+    executedAmount: bigint,
+    amount: string,
+  ) {
+    if (order.side === SwapSide.SELL) {
+      const executorData: SellExecutorData = {
+        executionCalldata: txParams.data,
+        feeRecipient: ZERO_ADDRESS,
+        srcToken: srcToken,
+        destToken: destToken,
+        feeAmount: "0", // purposely take no fee
+      };
+
+      return ethers.AbiCoder.defaultAbiCoder().encode(
+        ["(bytes executionCalldata,address feeRecipient,address srcToken,address destToken,uint256 feeAmount)"],
+        [executorData],
+      );
+    }
+
+    const executorData: BuyExecutorData = {
+      executorCalldata: txParams.data,
+      feeRecipient: ZERO_ADDRESS,
+      srcToken: srcToken,
+      destToken: destToken,
+      quotedAmount: executedAmount.toString(),
+      destAmount: amount,
+      approveSrc: true,
+    };
+
+    return ethers.AbiCoder.defaultAbiCoder().encode(
+      [
+        "(bytes executorCalldata,address feeRecipient,address srcToken, address destToken,uint256 quotedAmount,uint256 destAmount,bool approveSrc)",
+      ],
+      [executorData],
+    );
+  }
+
   private async buildSettlementTransaction(chainId: number, order: DeltaExecuteOrder): Promise<TransactionRequest> {
     const { orderData, signature } = order;
 
@@ -164,26 +212,30 @@ export class AgentService {
         destToken: orderData.destToken,
         srcAmount: orderData.srcAmount,
         destAmount: orderData.destAmount,
-        expectedDestAmount: orderData.expectedAmount,
+        expectedAmount: orderData.expectedAmount,
         nonce: orderData.nonce,
         deadline: orderData.deadline,
         permit: orderData.permit,
         partnerAndFee: orderData.partnerAndFee,
+        kind: orderData.kind,
+        metadata: orderData.metadata,
         bridge: orderData.bridge,
       },
       signature,
     };
 
-    const data = deltaInterface.encodeFunctionData("swapSettle", [
+    const settlementFunctionName = order.side === SwapSide.SELL ? "swapSettle" : "buySettle";
+    const data = deltaInterface.encodeFunctionData(settlementFunctionName, [
       orderWithSig,
       order.solution.calldataToExecute,
-      AUGUSTUS_EXECUTOR_ADDRESS,
+      order.solution.executionAddress,
       order.bridgeDataEncoded,
     ]);
 
     return {
       from: this.wallet.address,
       to: DELTA_ADDRESS,
+      value: order.value,
       chainId,
       data,
       gasLimit: 1_000_000,
@@ -211,6 +263,28 @@ export class AgentService {
     } catch (e) {
       logger.error(`Error getting fee amount in token ${tokenAddress}`, e);
       throw e;
+    }
+  }
+
+  private async fetchLimitOrders(chainId: number): Promise<DeltaBidOrder[]> {
+    if (!LIMIT_ORDERS_API_KEY) {
+      logger.warn("No limit orders API key provided, skipping fetching limit orders");
+
+      return [];
+    }
+
+    try {
+      return await axios
+        .get<DeltaBidOrder[]>(`${DELTA_BASE_URL}/orders/orderbook/${chainId}/${AGENT_NAME}`, {
+          headers: {
+            "x-api-key": LIMIT_ORDERS_API_KEY,
+          },
+        })
+        .then((x) => x.data);
+    } catch (e) {
+      logger.error(`Failed to fetch limit orders for chain ${chainId}`, e);
+
+      return [];
     }
   }
 }

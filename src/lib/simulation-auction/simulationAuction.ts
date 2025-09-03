@@ -5,6 +5,8 @@ import {
   type DeltaBidResponse,
   type DeltaOrderWithSignature,
   type ExecuteRequest,
+  OrderKind,
+  OrderType,
   SettlementType,
   type Solution,
 } from "@/common/types";
@@ -151,7 +153,9 @@ export class SimulationAuction {
       signature: order.signature,
     };
 
-    return deltaInterface.encodeFunctionData("swapSettle", [
+    const methodName = order.order.kind === OrderKind.Buy ? "buySettle" : "swapSettle";
+
+    return deltaInterface.encodeFunctionData(methodName, [
       orderWithSig,
       solution.calldataToExecute,
       solution.executionAddress,
@@ -180,6 +184,7 @@ export class SimulationAuction {
           srcAmount: orderWithSignature.order.srcAmount,
           destAmount: orderWithSignature.order.destAmount,
           partiallyFillable: false,
+          type: OrderType.Market,
           metadata: {
             deltaGasOverhead: DELTA_GAS_OVERHEAD,
           },
@@ -207,18 +212,21 @@ export class SimulationAuction {
             destToken: orderWithSignature.order.destToken,
             srcAmount: orderWithSignature.order.srcAmount,
             destAmount: orderWithSignature.order.destAmount,
-            expectedAmount: orderWithSignature.order.expectedDestAmount,
+            expectedAmount: orderWithSignature.order.expectedAmount,
             nonce: orderWithSignature.order.nonce,
             deadline: orderWithSignature.order.deadline,
+            kind: orderWithSignature.order.kind,
+            metadata: orderWithSignature.order.metadata,
             permit: orderWithSignature.order.permit,
             partnerAndFee: orderWithSignature.order.partnerAndFee,
             bridge: orderWithSignature.order.bridge,
           },
           signature: orderWithSignature.signature,
-          side: "SELL",
+          side: orderWithSignature.order.kind === OrderKind.Buy ? "BUY" : "SELL",
           partiallyFillable: false,
           solution: solution,
           bridgeDataEncoded: "0x",
+          value: "0",
         },
       ],
     };

@@ -1,4 +1,4 @@
-import type { ChainTokensConfig, DeltaOrder, Token } from "@/common/types";
+import type { ChainTokensConfig, DeltaOrder, SwapSide, Token } from "@/common/types";
 import tokens from "@/lib/data/tokens.json";
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
 import { type HDNodeWallet, Signature, Wallet, ethers } from "ethers";
@@ -18,9 +18,11 @@ class OrderGenerator {
     // generate random account
     const userAccount = this.generateRandomAccount();
     // generate random token pair for a trade
-    const { srcToken, destToken, amount } = this.getRandomTokenTrade(chainId);
+    const { srcToken, destToken, amount, side } = this.getRandomTokenTrade(chainId);
+    const isBuy = side === "BUY";
+    const formattedAmount = ethers.formatUnits(amount, isBuy ? destToken.decimals : srcToken.decimals);
     logger.info(
-      `Generating an order: ${ethers.formatUnits(amount, srcToken.decimals)} ${srcToken.symbol} -> ${destToken.symbol} for user ${userAccount.address}`,
+      `Generating a ${side} order: ${isBuy ? "" : formattedAmount} ${srcToken.symbol} -> ${isBuy ? formattedAmount : ""} ${destToken.symbol} for user ${userAccount.address}`,
     );
     // get pricing for the pair
     const deltaPrice = await deltaAPI.getPrices({
@@ -30,7 +32,7 @@ class OrderGenerator {
       srcDecimals: srcToken.decimals,
       destDecimals: destToken.decimals,
       amount,
-      side: "SELL",
+      side,
     });
     // get the order to sign
     const { toSign } = await deltaAPI.buildOrder({
@@ -38,10 +40,11 @@ class OrderGenerator {
       owner: userAccount.address,
       chainId,
       bridge: {
-        maxRelayerFee: "0",
+        protocolSelector: "0x00000000",
         destinationChainId: 0,
         outputToken: ZERO_ADDRESS,
-        multiCallHandler: ZERO_ADDRESS,
+        scalingFactor: 0,
+        protocolData: "0x",
       },
     });
     // sign the order
@@ -60,7 +63,10 @@ class OrderGenerator {
     return Wallet.createRandom();
   }
 
-  private getRandomTokenTrade(chainId: number): { srcToken: Token; destToken: Token; amount: string } {
+  private getRandomTokenTrade(chainId: number): { srcToken: Token; destToken: Token; amount: string; side: SwapSide } {
+    // generate a random side for the trade
+    // const side = Math.random() < 0.5 ? "SELL" : "BUY";
+    const side = "BUY" as SwapSide;
     const chainConfig = (tokens as ChainTokensConfig)[chainId];
     // revert if there is no tokens for the chain
     if (!chainConfig) {
@@ -87,8 +93,12 @@ class OrderGenerator {
     // get the tokens
     const srcToken = chainConfig[srcTokenAddress];
     const destToken = chainConfig[destTokenAddress];
+
+    // for SELL orders, amount represents the amount of source token to spend
+    // for BUY orders, amount represents the amount of destination token to receive
+    const amountToken = side === "SELL" ? srcToken : destToken;
     // generate the amount
-    const { min, max } = srcToken.amounts;
+    const { min, max } = amountToken.amounts;
     // get the range
     const amountsDiff = BigInt(max) - BigInt(min);
     // choose a random value in range
@@ -101,6 +111,7 @@ class OrderGenerator {
       srcToken,
       destToken,
       amount: amount.toString(),
+      side,
     };
   }
 }

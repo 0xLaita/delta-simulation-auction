@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { ethers } from "ethers";
-import type { DeltaOrder } from "../src/common/types";
+import { type DeltaOrder, OrderType, type SwapSide } from "../src/common/types";
 import { env } from "../src/common/utils/envConfig";
 import { deltaAPI } from "../src/lib/delta-api/deltaAPI";
 import { HttpAgent } from "../src/lib/simulation-auction/httpAgent";
@@ -29,6 +29,10 @@ const destToken = {
 const readableAmount = "1";
 const amount = ethers.parseUnits(readableAmount, srcToken.decimals).toString();
 
+const getRandomSide = () => {
+  return Math.random() < 0.5 ? "BUY" : "SELL";
+};
+
 const main = async () => {
   console.log("Running on chain auction flow with config:");
   console.log(`Chain: ${chainId}`);
@@ -43,10 +47,12 @@ const main = async () => {
       return;
     }
 
+    // generate a random side for the order
+    const side = getRandomSide();
     // create the agent
     const agent = new HttpAgent(env.AGENT_NAME, env.AGENT_URL);
     // fetch prices and build the order for the pair
-    const { order, signature } = await buildAndSignOrder();
+    const { order, signature } = await buildAndSignOrder(side);
     // generate id for the order
     const orderId = randomUUID();
     // get bid from the agent
@@ -59,8 +65,9 @@ const main = async () => {
           destToken: order.destToken,
           srcAmount: order.srcAmount,
           destAmount: order.destAmount,
-          side: "SELL",
+          side,
           partiallyFillable: false,
+          type: OrderType.Market,
           metadata: {
             deltaGasOverhead: 250_000,
           },
@@ -71,10 +78,10 @@ const main = async () => {
     if (!bidResponse || !bidResponse.solutions || bidResponse.solutions.length === 0) {
       console.log("No bid was returned from the agent");
       return;
-    } else {
-      console.log("Received bid:\n");
-      console.log(bidResponse);
     }
+
+    console.log("Received bid:\n");
+    console.log(bidResponse);
     // validate order id
     if (bidResponse.solutions[0].orderId.toLowerCase() !== orderId.toLowerCase()) {
       console.log(
@@ -95,15 +102,18 @@ const main = async () => {
             destToken: order.destToken,
             srcAmount: order.srcAmount,
             destAmount: order.destAmount,
-            expectedAmount: order.expectedDestAmount,
+            expectedAmount: order.expectedAmount,
             nonce: order.nonce,
             deadline: order.deadline,
             permit: order.permit,
             partnerAndFee: order.partnerAndFee,
+            kind: order.kind,
+            metadata: order.metadata,
             bridge: order.bridge,
           },
           signature,
-          side: "SELL",
+          side,
+          value: "0",
           partiallyFillable: false,
           bridgeDataEncoded: "0x",
           solution: bidResponse.solutions[0],
@@ -150,14 +160,14 @@ const runChecks = async () => {
   return true;
 };
 
-const buildAndSignOrder = async (): Promise<{ order: DeltaOrder; signature: string }> => {
+const buildAndSignOrder = async (side: SwapSide): Promise<{ order: DeltaOrder; signature: string }> => {
   const price = await deltaAPI.getPrices({
     chainId,
     srcToken: srcToken.address,
     srcDecimals: srcToken.decimals,
     destToken: destToken.address,
     destDecimals: destToken.decimals,
-    side: "SELL",
+    side,
     amount,
   });
 
@@ -166,6 +176,7 @@ const buildAndSignOrder = async (): Promise<{ order: DeltaOrder; signature: stri
     chainId,
     price,
     slippage: 10_000, // 10% - adjust if needed
+    side,
   });
 
   // change delta address
