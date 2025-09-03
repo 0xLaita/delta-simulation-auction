@@ -6,6 +6,7 @@ import {
   type DeltaOrderWithSignature,
   type ExecuteRequest,
   OrderKind,
+  OrderType,
   SettlementType,
   type Solution,
 } from "@/common/types";
@@ -183,6 +184,7 @@ export class SimulationAuction {
           srcAmount: orderWithSignature.order.srcAmount,
           destAmount: orderWithSignature.order.destAmount,
           partiallyFillable: false,
+          type: OrderType.Market,
           metadata: {
             deltaGasOverhead: DELTA_GAS_OVERHEAD,
           },
@@ -224,6 +226,7 @@ export class SimulationAuction {
           partiallyFillable: false,
           solution: solution,
           bridgeDataEncoded: "0x",
+          value: "0",
         },
       ],
     };
