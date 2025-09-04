@@ -39,6 +39,7 @@ class OrderGenerator {
       price: deltaPrice,
       owner: userAccount.address,
       chainId,
+      side,
       bridge: {
         protocolSelector: "0x00000000",
         destinationChainId: 0,
@@ -65,8 +66,7 @@ class OrderGenerator {
 
   private getRandomTokenTrade(chainId: number): { srcToken: Token; destToken: Token; amount: string; side: SwapSide } {
     // generate a random side for the trade
-    // const side = Math.random() < 0.5 ? "SELL" : "BUY";
-    const side = "BUY" as SwapSide;
+    const side = Math.random() < 0.5 ? "SELL" : "BUY";
     const chainConfig = (tokens as ChainTokensConfig)[chainId];
     // revert if there is no tokens for the chain
     if (!chainConfig) {
