@@ -1,11 +1,4 @@
-import type {
-  DeltaBidRequest,
-  DeltaBidResponse,
-  DeltaOrder,
-  DeltaOrderWithSignature,
-  ExecuteRequest,
-  Solution,
-} from "@/common/types";
+import type { DeltaBidRequest, DeltaBidResponse, ExecuteRequest } from "@/common/types";
 import { env } from "@/common/utils/envConfig";
 import axios, { type AxiosInstance, type AxiosRequestHeaders } from "axios";
 import { pino } from "pino";

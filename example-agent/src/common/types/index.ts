@@ -6,8 +6,17 @@ export interface DeltaBidRequest {
 }
 
 export enum OrderType {
-  Market = "Market",
-  Limit = "Limit",
+  Market = "MARKET",
+  Limit = "LIMIT",
+}
+
+export enum SettlementMethod {
+  SwapSettle = "swapSettle",
+}
+
+export interface BridgeOverride {
+  protocolSelector: string;
+  protocolData: string;
 }
 
 export interface DeltaBridge {
@@ -53,7 +62,10 @@ export interface DeltaExecuteOrder {
   side: SwapSide;
   partiallyFillable: boolean;
   solution: Solution;
+  settlementMethod: SettlementMethod;
   bridgeDataEncoded: string;
+  bridgeOverride: BridgeOverride;
+  cosignature: string;
   value: string;
 }
 

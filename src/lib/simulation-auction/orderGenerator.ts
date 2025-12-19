@@ -1,15 +1,29 @@
-import type { ChainTokensConfig, DeltaOrder, SwapSide, Token } from "@/common/types";
+import type { ChainTokensConfig, DeltaBridgeOverride, DeltaOrder, SwapSide, Token } from "@/common/types";
 import tokens from "@/lib/data/tokens.json";
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
-import { type HDNodeWallet, Signature, Wallet, ethers } from "ethers";
+import { type HDNodeWallet, Signature, Wallet, ZeroAddress, ethers } from "ethers";
 import { pino } from "pino";
-import { ZERO_ADDRESS } from "../../../example-agent/src/common/constants";
 
 interface SignedOrder {
   order: DeltaOrder;
   signature: string;
+  bridgeOverride: DeltaBridgeOverride;
+  cosignature: string;
   chainId: number;
 }
+
+const EMPTY_BRIDGE = {
+  protocolSelector: "0x00000000",
+  destinationChainId: 0,
+  outputToken: ZeroAddress,
+  scalingFactor: 0,
+  protocolData: "0x",
+};
+
+const EMPTY_BRIDGE_OVERRIDE = {
+  protocolSelector: "0x00000000",
+  protocolData: "0x",
+};
 
 const logger = pino({ name: "Order Generator" });
 
@@ -40,13 +54,7 @@ class OrderGenerator {
       owner: userAccount.address,
       chainId,
       side,
-      bridge: {
-        protocolSelector: "0x00000000",
-        destinationChainId: 0,
-        outputToken: ZERO_ADDRESS,
-        scalingFactor: 0,
-        protocolData: "0x",
-      },
+      bridge: EMPTY_BRIDGE,
     });
     // sign the order
     const signature = await userAccount.signTypedData(toSign.domain, toSign.types, toSign.value);
@@ -56,6 +64,8 @@ class OrderGenerator {
     return {
       order: toSign.value,
       signature: compactSignature,
+      bridgeOverride: EMPTY_BRIDGE_OVERRIDE,
+      cosignature: "0x",
       chainId,
     };
   }
@@ -64,7 +74,12 @@ class OrderGenerator {
     return Wallet.createRandom();
   }
 
-  private getRandomTokenTrade(chainId: number): { srcToken: Token; destToken: Token; amount: string; side: SwapSide } {
+  private getRandomTokenTrade(chainId: number): {
+    srcToken: Token;
+    destToken: Token;
+    amount: string;
+    side: SwapSide;
+  } {
     // generate a random side for the trade
     const side = Math.random() < 0.5 ? "SELL" : "BUY";
     const chainConfig = (tokens as ChainTokensConfig)[chainId];
