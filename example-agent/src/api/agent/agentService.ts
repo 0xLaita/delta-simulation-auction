@@ -8,6 +8,7 @@ import {
   type ExecuteRequest,
   type QuoteRequest,
   type QuoteResponse,
+  SettlementMethod,
   SettlementType,
   type Solution,
 } from "@/common/types";
@@ -66,6 +67,11 @@ export class AgentService {
   public async execute(request: ExecuteRequest) {
     for (const order of request.orders) {
       try {
+        if (order.settlementMethod !== SettlementMethod.SwapSettle) {
+          logger.info("Only Swap settlement is supported");
+          continue;
+        }
+
         logger.info(`Executing the auction ${order.orderId}`);
         const transaction = await this.buildSettlementTransaction(request.chainId, order);
         const provider = new JsonRpcProvider(env.RPC_URL, request.chainId, {
@@ -202,7 +208,7 @@ export class AgentService {
   }
 
   private async buildSettlementTransaction(chainId: number, order: DeltaExecuteOrder): Promise<TransactionRequest> {
-    const { orderData, signature } = order;
+    const { orderData, signature, bridgeOverride, cosignature } = order;
 
     const orderWithSig = {
       order: {
@@ -222,6 +228,8 @@ export class AgentService {
         bridge: orderData.bridge,
       },
       signature,
+      bridgeOverride,
+      cosignature,
     };
 
     const settlementFunctionName = order.side === SwapSide.SELL ? "swapSettle" : "buySettle";

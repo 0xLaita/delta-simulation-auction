@@ -6,8 +6,12 @@ export enum OrderKind {
 }
 
 export enum OrderType {
-  Market = "Market",
-  Limit = "Limit",
+  Market = "MARKET",
+  Limit = "LIMIT",
+}
+
+export enum SettlementMethod {
+  SwapSettle = "swapSettle",
 }
 
 export interface AmountsConfig {
@@ -65,8 +69,11 @@ export interface ExecuteRequest {
 
 export interface DeltaExecuteOrder {
   orderId: string;
+  settlementMethod: SettlementMethod;
   orderData: DeltaOrder;
   signature: string;
+  bridgeOverride: DeltaBridgeOverride;
+  cosignature: string;
   side: SwapSide;
   partiallyFillable: boolean;
   solution: Solution;
@@ -79,6 +86,11 @@ export interface DeltaBridge {
   destinationChainId: number;
   outputToken: string;
   scalingFactor: number;
+  protocolData: string;
+}
+
+export interface DeltaBridgeOverride {
+  protocolSelector: string;
   protocolData: string;
 }
 
@@ -104,6 +116,8 @@ export interface DeltaOrderWithSignature {
   chainId: number;
   order: DeltaOrder;
   signature: string;
+  bridgeOverride: DeltaBridgeOverride;
+  cosignature: string;
 }
 
 export const SettlementType = {

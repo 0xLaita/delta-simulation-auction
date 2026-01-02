@@ -7,6 +7,7 @@ import {
   type ExecuteRequest,
   OrderKind,
   OrderType,
+  SettlementMethod,
   SettlementType,
   type Solution,
 } from "@/common/types";
@@ -92,13 +93,15 @@ export class SimulationAuction {
   }
 
   async generateOrderWithSignature(): Promise<DeltaOrderWithSignature> {
-    const { order, signature } = await orderGenerator.generateSignedOrder(this.chainId);
+    const { order, signature, bridgeOverride, cosignature } = await orderGenerator.generateSignedOrder(this.chainId);
 
     return {
       id: randomUUID(),
       chainId: this.chainId,
       order: order,
       signature,
+      bridgeOverride,
+      cosignature,
     };
   }
 
@@ -151,6 +154,8 @@ export class SimulationAuction {
     const orderWithSig = {
       order: order.order,
       signature: order.signature,
+      bridgeOverride: order.bridgeOverride,
+      cosignature: order.cosignature,
     };
 
     const methodName = order.order.kind === OrderKind.Buy ? "buySettle" : "swapSettle";
@@ -167,6 +172,8 @@ export class SimulationAuction {
     const orderWithSig = {
       order: order.order,
       signature: order.signature,
+      bridgeOverride: order.bridgeOverride,
+      cosignature: order.cosignature,
     };
 
     return deltaInterface.encodeFunctionData("directSettle", [orderWithSig, solution.executedAmount, "0x"]);
@@ -222,6 +229,9 @@ export class SimulationAuction {
             bridge: orderWithSignature.order.bridge,
           },
           signature: orderWithSignature.signature,
+          bridgeOverride: orderWithSignature.bridgeOverride,
+          settlementMethod: SettlementMethod.SwapSettle,
+          cosignature: orderWithSignature.cosignature,
           side: orderWithSignature.order.kind === OrderKind.Buy ? "BUY" : "SELL",
           partiallyFillable: false,
           solution: solution,
