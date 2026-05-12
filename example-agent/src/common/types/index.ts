@@ -5,32 +5,7 @@ export interface DeltaBidRequest {
   orders: DeltaBidOrder[];
 }
 
-export enum OrderType {
-  Market = "MARKET",
-  Limit = "LIMIT",
-}
-
-export enum SettlementMethod {
-  SwapSettle = "swapSettle",
-}
-
-export interface BridgeOverride {
-  protocolSelector: string;
-  protocolData: string;
-}
-
-export interface DeltaBridge {
-  protocolSelector: string;
-  destinationChainId: number;
-  outputToken: string;
-  scalingFactor: number;
-  protocolData: string;
-}
-
-export interface DeltaBidOrderMetadata {
-  deltaGasOverhead?: number | null;
-}
-
+// Order data sent to agents during the bidding stage.
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
@@ -41,8 +16,6 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
-  metadata: DeltaBidOrderMetadata;
-  type: OrderType;
 }
 
 export interface DeltaBidResponse {
@@ -50,59 +23,14 @@ export interface DeltaBidResponse {
   solutions: Solution[];
 }
 
-export interface ExecuteRequest {
-  chainId: number;
-  orders: DeltaExecuteOrder[];
-}
-
-export interface DeltaExecuteOrder {
-  orderId: string;
-  orderData: OnChainDeltaOrderData;
-  signature: string;
-  side: SwapSide;
-  partiallyFillable: boolean;
-  solution: Solution;
-  settlementMethod: SettlementMethod;
-  bridgeDataEncoded: string;
-  bridgeOverride: BridgeOverride;
-  cosignature: string;
-  value: string;
-}
-
-export interface DeltaOrder {
-  owner: string;
-  beneficiary: string;
-  srcToken: string;
-  destToken: string;
-  srcAmount: string;
-  destAmount: string;
-  expectedAmount: string;
-  deadline: number;
-  kind: number;
-  nonce: string;
-  partnerAndFee: string;
-  metadata: string;
-  permit: string;
-  bridge: DeltaBridge;
-}
-
-export type OnChainDeltaOrderData = Omit<DeltaOrder, "expectedDestAmount"> & {
-  expectedAmount: string;
-};
-
-export const SettlementType = {
-  Swap: "SWAP",
-  Direct: "DIRECT",
-} as const;
-
-export type SettlementType = (typeof SettlementType)[keyof typeof SettlementType];
-
+// What the agent returns for each order. The relayer wraps (target, callData)
+// into a GenericSwapExecutor SwapData payload before submitting on-chain — the
+// agent does not need to encode SwapData itself.
 export interface Solution {
   orderId: string;
   executedAmount: string;
-  calldataToExecute: string;
-  executionAddress: string;
-  settlementType: SettlementType;
+  callData: string;
+  target: string;
   fillPercent?: number;
 }
 

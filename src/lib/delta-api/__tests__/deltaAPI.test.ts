@@ -1,6 +1,5 @@
 import { deltaAPI } from "@/lib/delta-api/deltaAPI";
-import { Wallet } from "ethers";
-import { ZERO_ADDRESS } from "../../../../example-agent/src/common/constants";
+import { Wallet, ZeroAddress } from "ethers";
 
 describe("DeltaAPI", () => {
   const chainId = 1;
@@ -42,12 +41,13 @@ describe("DeltaAPI", () => {
       const builtOrder = await deltaAPI.buildOrder({
         price,
         chainId,
-        owner: USDC,
+        owner,
         bridge: {
+          protocolSelector: "0x00000000",
           destinationChainId: 0,
-          maxRelayerFee: "0",
-          multiCallHandler: ZERO_ADDRESS,
-          outputToken: ZERO_ADDRESS,
+          outputToken: ZeroAddress,
+          scalingFactor: 0,
+          protocolData: "0x",
         },
       });
 

@@ -14,7 +14,6 @@ export const env = cleanEnv(process.env, {
   AGENT_NAME: str(),
   AGENT_ADDRESS: str(),
   AGENT_URL: url(),
-  USER_PK: str({ default: "" }),
   AUCTION_GENERATION_INTERVAL_MS: num({ default: 10_000 }),
   RPC_URL: str(),
   TENDERLY_ACCOUNT_SLUG: str(),
