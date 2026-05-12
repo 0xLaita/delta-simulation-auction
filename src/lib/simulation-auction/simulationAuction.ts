@@ -17,7 +17,7 @@ const DELTA_ADDRESS = "0x0000000000bbf5c5fd284e657f01bd000933c96d";
 // Production GenericSwapExecutor — same address the relayer routes through.
 // Agent bids carry (target, callData) for the underlying DEX; the executor
 // here owns the SwapData entrypoint that wraps that call.
-const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x6C98Bb78B8bc5bE249686492a690a95B5028A866";
+const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x16B81FE4Ee14c1D395744CE143983825A176A3ac";
 const AGENT_ADDRESS = env.AGENT_ADDRESS;
 
 export class SimulationAuction {

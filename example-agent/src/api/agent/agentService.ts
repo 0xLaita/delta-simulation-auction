@@ -15,7 +15,7 @@ const logger = pino({ name: "Agent" });
 const DEFAULT_SLIPPAGE = 500;
 // GenericSwapExecutor is the msg.sender on the target call, so the SDK has
 // to build the swap calldata expecting that caller.
-const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x6C98Bb78B8bc5bE249686492a690a95B5028A866";
+const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x16B81FE4Ee14c1D395744CE143983825A176A3ac";
 const DELTA_BASE_URL = "https://api.paraswap.io/delta";
 const LIMIT_ORDERS_API_KEY = process.env.LIMIT_ORDERS_API_KEY;
 const AGENT_NAME = process.env.AGENT_NAME ?? "example-agent";
