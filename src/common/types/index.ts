@@ -5,15 +5,6 @@ export enum OrderKind {
   Buy = 1,
 }
 
-export enum OrderType {
-  Market = "MARKET",
-  Limit = "LIMIT",
-}
-
-export enum SettlementMethod {
-  SwapSettle = "swapSettle",
-}
-
 export interface AmountsConfig {
   min: string;
   max: string;
@@ -34,16 +25,13 @@ export interface Token {
   address: string;
   decimals: number;
 }
+
 export interface DeltaBidRequest {
   chainId: number;
   orders: DeltaBidOrder[];
 }
 
-export interface DeltaBidOrderMetadata {
-  deltaGasOverhead?: number | null;
-}
-
-// Order data sent to agents during bidding stage
+// Order data sent to agents during the bidding stage.
 export interface DeltaBidOrder {
   orderId: string;
   srcToken: string;
@@ -54,31 +42,10 @@ export interface DeltaBidOrder {
   srcAmount: string;
   destAmount: string;
   partiallyFillable: boolean;
-  metadata: DeltaBidOrderMetadata;
-  type: OrderType;
 }
 
 export interface DeltaBidResponse {
   solutions: Solution[];
-}
-
-export interface ExecuteRequest {
-  chainId: number;
-  orders: DeltaExecuteOrder[];
-}
-
-export interface DeltaExecuteOrder {
-  orderId: string;
-  settlementMethod: SettlementMethod;
-  orderData: DeltaOrder;
-  signature: string;
-  bridgeOverride: DeltaBridgeOverride;
-  cosignature: string;
-  side: SwapSide;
-  partiallyFillable: boolean;
-  solution: Solution;
-  bridgeDataEncoded: string;
-  value: string;
 }
 
 export interface DeltaBridge {
@@ -120,18 +87,13 @@ export interface DeltaOrderWithSignature {
   cosignature: string;
 }
 
-export const SettlementType = {
-  Swap: "SWAP",
-  Direct: "DIRECT",
-} as const;
-
-export type SettlementType = (typeof SettlementType)[keyof typeof SettlementType];
-
+// What the agent returns for each order. The relayer (or, here, the simulator)
+// wraps `(target, callData)` into a GenericSwapExecutor SwapData payload
+// before submission.
 export interface Solution {
   orderId: string;
   executedAmount: string;
-  calldataToExecute: string;
-  executionAddress: string;
-  settlementType: SettlementType;
+  callData: string;
+  target: string;
   fillPercent?: number;
 }

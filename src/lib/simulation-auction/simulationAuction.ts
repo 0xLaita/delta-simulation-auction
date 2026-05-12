@@ -1,19 +1,10 @@
 import { randomUUID } from "node:crypto";
 import DELTA_ABI from "@/common/abi/delta.abi.json";
-import {
-  type DeltaBidRequest,
-  type DeltaBidResponse,
-  type DeltaOrderWithSignature,
-  type ExecuteRequest,
-  OrderKind,
-  OrderType,
-  SettlementMethod,
-  SettlementType,
-  type Solution,
-} from "@/common/types";
+import { type DeltaBidRequest, type DeltaOrderWithSignature, OrderKind, type Solution } from "@/common/types";
 import { env } from "@/common/utils/envConfig";
 import { httpAgent } from "@/lib/simulation-auction/httpAgent";
 import { orderGenerator } from "@/lib/simulation-auction/orderGenerator";
+import { encodeSwapData } from "@/lib/simulation-auction/swapData";
 import { type StateOverride, TenderlySimulator } from "@/lib/tenderly";
 import { Interface } from "ethers";
 import { pino } from "pino";
@@ -23,21 +14,20 @@ const logger = pino({ name: "Simulation Auction" });
 const deltaInterface = Interface.from(DELTA_ABI);
 const PORTIKUS_ADDRESS = "0x0007005729e310000c6003402d8a0fb700da0c00";
 const DELTA_ADDRESS = "0x0000000000bbf5c5fd284e657f01bd000933c96d";
+// Production GenericSwapExecutor — same address the relayer routes through.
+// Agent bids carry (target, callData) for the underlying DEX; the executor
+// here owns the SwapData entrypoint that wraps that call.
+const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x6C98Bb78B8bc5bE249686492a690a95B5028A866";
 const AGENT_ADDRESS = env.AGENT_ADDRESS;
 
-const DELTA_GAS_OVERHEAD = 250_000;
-
 export class SimulationAuction {
-  // static props
   static instances: Record<number, SimulationAuction> = {};
-  // instance props
   interval: NodeJS.Timeout | null = null;
 
   static getInstance(chainId: number): SimulationAuction {
     if (!SimulationAuction.instances[chainId]) {
       SimulationAuction.instances[chainId] = new SimulationAuction(chainId);
     }
-
     return SimulationAuction.instances[chainId];
   }
 
@@ -59,33 +49,27 @@ export class SimulationAuction {
 
   async simulateAuctionFlow() {
     try {
-      // generate a signed order with id
       const deltaOrderWithSignature = await this.generateOrderWithSignature();
-      logger.info("Generated Delta Auction with trade");
-      // query the agent for a bid
+      logger.info("Generated Delta auction with trade");
+
+      // Query the agent for a bid.
       const request = this.getBidRequest(deltaOrderWithSignature);
-      const solution = await httpAgent.bid(request);
+      const response = await httpAgent.bid(request);
+      const solution = response?.solutions.find((s) => s.orderId === deltaOrderWithSignature.id);
       if (!solution) {
-        // terminate if no solution was found
         logger.error("Received no solution for generated auction, terminating the flow...");
         return;
       }
       logger.info(`Received solution for generated auction: ${JSON.stringify(solution)}`);
-      // simulate the solution
-      const simulation = await this.simulateBidSolution(deltaOrderWithSignature, solution.solutions[0]);
-      logger.info(`Solution simulation - ${simulation.url}`);
+
+      // The relayer would now wrap (target, callData) into a SwapData payload
+      // and submit `swapSettle` / `buySettle` on the delta contract itself —
+      // the agent is not involved in execution. We mirror that here against
+      // Tenderly so the agent author can verify their bid would have settled.
+      const simulation = await this.simulateSettlement(deltaOrderWithSignature, solution);
+      logger.info(`Settlement simulation - ${simulation.url}`);
       if (!simulation.success) {
-        // terminate if solution is invalid
-        logger.error("Solution simulation reverted, terminating the flow...");
-        return;
-      }
-      // skipping the competition, let the agent execute the order
-      const executeRequest = this.getExecuteRequest(deltaOrderWithSignature, solution);
-      const { success } = await httpAgent.execute(executeRequest);
-      if (success) {
-        logger.info("Successfully notified the agent to execute the order");
-      } else {
-        logger.error("Failed to notify the agent to execute the order");
+        logger.error("Settlement simulation reverted");
       }
     } catch (e) {
       logger.error(`Error simulating auction flow: ${e}`);
@@ -94,18 +78,17 @@ export class SimulationAuction {
 
   async generateOrderWithSignature(): Promise<DeltaOrderWithSignature> {
     const { order, signature, bridgeOverride, cosignature } = await orderGenerator.generateSignedOrder(this.chainId);
-
     return {
       id: randomUUID(),
       chainId: this.chainId,
-      order: order,
+      order,
       signature,
       bridgeOverride,
       cosignature,
     };
   }
 
-  private async simulateBidSolution(orderWithSignature: DeltaOrderWithSignature, solution: Solution) {
+  private async simulateSettlement(orderWithSignature: DeltaOrderWithSignature, solution: Solution) {
     const { order } = orderWithSignature;
     const simulator = TenderlySimulator.getInstance();
 
@@ -127,12 +110,12 @@ export class SimulationAuction {
       order.owner,
       amountToFund,
     );
+    // In production the relayer's EOA submits the settlement tx; here the
+    // configured AGENT_ADDRESS plays that role and needs to be registered
+    // with Portikus so the delta contract accepts the call.
     simulator.addAgentRegistryOverride(stateOverride, PORTIKUS_ADDRESS, AGENT_ADDRESS);
 
-    const data =
-      solution.settlementType === SettlementType.Swap
-        ? this.buildSwapSettlementCalldata(orderWithSignature, solution)
-        : this.buildDirectSettlementCalldata(orderWithSignature, solution);
+    const data = this.buildSettlementCalldata(orderWithSignature, solution);
 
     const simulationRequest = {
       chainId: orderWithSignature.chainId,
@@ -150,93 +133,58 @@ export class SimulationAuction {
     };
   }
 
-  buildSwapSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
+  private buildSettlementCalldata(orderWithSignature: DeltaOrderWithSignature, solution: Solution): string {
+    const { order } = orderWithSignature;
+    const isBuy = order.kind === OrderKind.Buy;
+
     const orderWithSig = {
-      order: order.order,
-      signature: order.signature,
-      bridgeOverride: order.bridgeOverride,
-      cosignature: order.cosignature,
+      order,
+      signature: orderWithSignature.signature,
+      bridgeOverride: orderWithSignature.bridgeOverride,
+      cosignature: orderWithSignature.cosignature,
     };
 
-    const methodName = order.order.kind === OrderKind.Buy ? "buySettle" : "swapSettle";
+    // Wrap the agent's (target, callData) into the GenericSwapExecutor
+    // SwapData payload, exactly as the relayer does in production. The
+    // executor decodes this and forwards to `solution.target` with
+    // `solution.callData`. quotedAmount is the agent's promised output;
+    // any surplus over it goes to feeRecipient.
+    const executorData = encodeSwapData({
+      isBuy,
+      srcToken: order.srcToken,
+      destToken: order.destToken,
+      quotedAmount: BigInt(solution.executedAmount),
+      feeRecipient: AGENT_ADDRESS,
+      // No prior allowance on the test executor — let it approve the target.
+      shouldApprove: true,
+      // Native-ETH src is not supported by the order generator, so 0 is fine.
+      value: 0n,
+      target: solution.target,
+      targetCalldata: solution.callData,
+    });
 
+    const methodName = isBuy ? "buySettle" : "swapSettle";
     return deltaInterface.encodeFunctionData(methodName, [
       orderWithSig,
-      solution.calldataToExecute,
-      solution.executionAddress,
+      executorData,
+      GENERIC_SWAP_EXECUTOR_ADDRESS,
       "0x",
     ]);
   }
 
-  buildDirectSettlementCalldata(order: DeltaOrderWithSignature, solution: Solution) {
-    const orderWithSig = {
-      order: order.order,
-      signature: order.signature,
-      bridgeOverride: order.bridgeOverride,
-      cosignature: order.cosignature,
-    };
-
-    return deltaInterface.encodeFunctionData("directSettle", [orderWithSig, solution.executedAmount, "0x"]);
-  }
-
   private getBidRequest(orderWithSignature: DeltaOrderWithSignature): DeltaBidRequest {
+    const { order } = orderWithSignature;
     return {
       chainId: orderWithSignature.chainId,
       orders: [
         {
           orderId: orderWithSignature.id,
-          srcToken: orderWithSignature.order.srcToken,
-          destToken: orderWithSignature.order.destToken,
-          side: "SELL",
-          srcAmount: orderWithSignature.order.srcAmount,
-          destAmount: orderWithSignature.order.destAmount,
+          srcToken: order.srcToken,
+          destToken: order.destToken,
+          side: order.kind === OrderKind.Buy ? "BUY" : "SELL",
+          srcAmount: order.srcAmount,
+          destAmount: order.destAmount,
           partiallyFillable: false,
-          type: OrderType.Market,
-          metadata: {
-            deltaGasOverhead: DELTA_GAS_OVERHEAD,
-          },
-        },
-      ],
-    };
-  }
-
-  private getExecuteRequest(orderWithSignature: DeltaOrderWithSignature, bid: DeltaBidResponse): ExecuteRequest {
-    const solution = bid.solutions.find((x) => x.orderId === orderWithSignature.id);
-
-    if (!solution) {
-      throw new Error(`No solution found for order ${orderWithSignature.id}`);
-    }
-
-    return {
-      chainId: this.chainId,
-      orders: [
-        {
-          orderId: solution.orderId,
-          orderData: {
-            owner: orderWithSignature.order.owner,
-            beneficiary: orderWithSignature.order.beneficiary,
-            srcToken: orderWithSignature.order.srcToken,
-            destToken: orderWithSignature.order.destToken,
-            srcAmount: orderWithSignature.order.srcAmount,
-            destAmount: orderWithSignature.order.destAmount,
-            expectedAmount: orderWithSignature.order.expectedAmount,
-            nonce: orderWithSignature.order.nonce,
-            deadline: orderWithSignature.order.deadline,
-            kind: orderWithSignature.order.kind,
-            metadata: orderWithSignature.order.metadata,
-            permit: orderWithSignature.order.permit,
-            partnerAndFee: orderWithSignature.order.partnerAndFee,
-            bridge: orderWithSignature.order.bridge,
-          },
-          signature: orderWithSignature.signature,
-          bridgeOverride: orderWithSignature.bridgeOverride,
-          settlementMethod: SettlementMethod.SwapSettle,
-          cosignature: orderWithSignature.cosignature,
-          side: orderWithSignature.order.kind === OrderKind.Buy ? "BUY" : "SELL",
-          partiallyFillable: false,
-          solution: solution,
-          bridgeDataEncoded: "0x",
-          value: "0",
         },
       ],
     };
