@@ -2,6 +2,11 @@ import type { SwapSide } from "@paraswap/sdk";
 
 export interface DeltaBidRequest {
   chainId: number;
+  // Address that will call the agent-provided `target` with the
+  // agent-provided `callData` during settlement. The bid calldata must
+  // be built expecting this caller (e.g. passed as `userAddress` on
+  // ParaSwap SDK calls).
+  executor: string;
   orders: DeltaBidOrder[];
 }
 

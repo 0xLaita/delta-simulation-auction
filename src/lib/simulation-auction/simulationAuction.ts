@@ -176,6 +176,7 @@ export class SimulationAuction {
     const { order } = orderWithSignature;
     return {
       chainId: orderWithSignature.chainId,
+      executor: GENERIC_SWAP_EXECUTOR_ADDRESS,
       orders: [
         {
           orderId: orderWithSignature.id,

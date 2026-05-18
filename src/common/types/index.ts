@@ -28,6 +28,11 @@ export interface Token {
 
 export interface DeltaBidRequest {
   chainId: number;
+  // Address that will call the agent-provided `target` with the
+  // agent-provided `callData` during settlement. Agents should build
+  // their bid calldata expecting this caller (e.g. pass it as
+  // `userAddress` on ParaSwap SDK calls).
+  executor: string;
   orders: DeltaBidOrder[];
 }
 

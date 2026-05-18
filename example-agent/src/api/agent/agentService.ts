@@ -13,9 +13,6 @@ import { pino } from "pino";
 const logger = pino({ name: "Agent" });
 
 const DEFAULT_SLIPPAGE = 500;
-// GenericSwapExecutor is the msg.sender on the target call, so the SDK has
-// to build the swap calldata expecting that caller.
-const GENERIC_SWAP_EXECUTOR_ADDRESS = "0x16B81FE4Ee14c1D395744CE143983825A176A3ac";
 const DELTA_BASE_URL = "https://api.paraswap.io/delta";
 const LIMIT_ORDERS_API_KEY = process.env.LIMIT_ORDERS_API_KEY;
 const AGENT_NAME = process.env.AGENT_NAME ?? "example-agent";
@@ -24,9 +21,11 @@ export class AgentService {
   private sdks: Record<number, SimpleFetchSDK> = {};
 
   public async bid(request: DeltaBidRequest): Promise<DeltaBidResponse> {
-    const { chainId, orders } = request;
+    const { chainId, executor, orders } = request;
     const limitOrders = await this.fetchLimitOrders(chainId);
-    const solutions = await Promise.all([...orders, ...limitOrders].map((order) => this.bidSingle(chainId, order)));
+    const solutions = await Promise.all(
+      [...orders, ...limitOrders].map((order) => this.bidSingle(chainId, executor, order)),
+    );
 
     return {
       chainId,
@@ -65,7 +64,7 @@ export class AgentService {
     return this.sdks[chainId];
   }
 
-  private async bidSingle(chainId: number, order: DeltaBidOrder): Promise<Solution | null> {
+  private async bidSingle(chainId: number, executor: string, order: DeltaBidOrder): Promise<Solution | null> {
     const { srcToken, destToken, side, srcAmount, destAmount, orderId } = order;
     // SELL quotes are sized by srcAmount; BUY quotes by destAmount.
     const amount = side === SwapSide.BUY ? destAmount : srcAmount;
@@ -79,7 +78,10 @@ export class AgentService {
         destToken,
         amount,
         side,
-        userAddress: GENERIC_SWAP_EXECUTOR_ADDRESS,
+        // The auction-provided `executor` is the msg.sender on the target
+        // call, so the SDK must build the swap calldata expecting that
+        // caller.
+        userAddress: executor,
         slippage: DEFAULT_SLIPPAGE,
       });
 
